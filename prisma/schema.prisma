@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoResiduo {
+  ALUMINIO
+  PLASTICO
+  VIDRIO
+  PAPEL
+}
+
+model Usuario {
+  id          String  @id @default(uuid())
+  nombre      String?
+  apellido    String?
+  email       String  @unique
+  contraseña  String
+}
+
+model Ecopunto {
+  id          String  @id @default(uuid())
+  description String
+  latitud     String
+  longitud    String
+  compra      Compra?
+}
+
+model Intercambio {
+  id       String   @id @default(uuid())
+  registro DateTime
+  imagen   String
+  cantidad String
+}
+
+model Horario {
+  id     String   @id @default(uuid())
+  dia    DateTime
+  inicio DateTime
+  cierre DateTime
+}
+
+model TipoResiduoClase {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Comunidad {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Compra {
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime
+  utilizado Int
+
+  ecopuntoId String   @unique
+  ecopunto   Ecopunto @relation(fields: [ecopuntoId], references: [id])
+}
+
+model Producto {
+  id          String @id @default(uuid())
+  description String
+  precio      String
+}
+
+model Progreso {
+  id String @id @default(uuid())
+}
+
+model Nivel {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Pregunta {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Logro {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Recompensa {
+  id          String @id @default(uuid())
+  description String
+}
+
+model Respuesta {
+  id          String @id @default(uuid())
+  description String
+}
