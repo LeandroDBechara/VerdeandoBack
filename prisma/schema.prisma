@@ -13,93 +13,180 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TipoResiduo {
-  ALUMINIO
-  PLASTICO
-  VIDRIO
-  PAPEL
+enum Role {
+  ADMIN
+  USUARIO
+  COLABORADOR
 }
 
 model Usuario {
-  id          String  @id @default(uuid())
-  nombre      String?
-  apellido    String?
-  email       String  @unique
-  contraseña  String
+  id                String   @id @default(uuid())
+  nombre            String
+  apellido          String
+  fechaDeNacimiento DateTime
+  email             String   @unique
+  contrasenia       String
+  fotoPerfil        String?
+  puntos            Int      @default(0)
+  direccion         String?
+
+  rol                Role     @default(USUARIO)
+  proveedorAuth      String?
+  proveedorId        String?
+  fechaAlta          DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  isDeleted          Boolean  @default(false)
+
+  comunidadId String?    @unique
+  comunidad   Comunidad? @relation(fields: [comunidadId], references: [id])
+
+  colaborador Colaborador?
+  canje       Canje[]
+  intercambio Intercambio[]
 }
 
-model Ecopunto {
-  id          String  @id @default(uuid())
-  description String
-  latitud     String
-  longitud    String
-  compra      Compra?
-}
+model Colaborador {
+  id        String @id @default(uuid())
+  cvu       String
+  domicilioFiscal String
+  cuitCuil  String
 
-model Intercambio {
-  id       String   @id @default(uuid())
-  registro DateTime
-  imagen   String
-  cantidad String
-}
+  fechaAlta          DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  isDeleted          Boolean  @default(false)
 
-model Horario {
-  id     String   @id @default(uuid())
-  dia    DateTime
-  inicio DateTime
-  cierre DateTime
-}
-
-model TipoResiduoClase {
-  id          String @id @default(uuid())
-  description String
+  usuarioId   String        @unique
+  usuario     Usuario       @relation(fields: [usuarioId], references: [id])
+  intercambio Intercambio[]
+  puntoVerde  PuntoVerde[]
 }
 
 model Comunidad {
-  id          String @id @default(uuid())
-  description String
+  id          String    @id @default(uuid())
+  nombre      String
+  descripcion String
+  usuarios    Usuario[]
+  puntos      Int       @default(0)
+  historial   String
+  isDeleted   Boolean   @default(false)
 }
 
-model Compra {
-  id        Int      @id @default(autoincrement())
-  fecha     DateTime
-  utilizado Int
+model Canje {
+  id            String   @id @default(uuid())
+  fechaDeCanjeo DateTime @default(now())
+  totalPuntos   Int      @default(0)
+  isDeleted     Boolean  @default(false)
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
 
-  ecopuntoId String   @unique
-  ecopunto   Ecopunto @relation(fields: [ecopuntoId], references: [id])
-}
-
-model Producto {
-  id          String @id @default(uuid())
-  description String
-  precio      String
-}
-
-model Progreso {
-  id String @id @default(uuid())
-}
-
-model Nivel {
-  id          String @id @default(uuid())
-  description String
-}
-
-model Pregunta {
-  id          String @id @default(uuid())
-  description String
-}
-
-model Logro {
-  id          String @id @default(uuid())
-  description String
+  recompensas RecompensaOnCanje[]
 }
 
 model Recompensa {
   id          String @id @default(uuid())
-  description String
+  titulo      String
+  descripcion String
+  puntos      Int
+  isDeleted   Boolean  @default(false)
+  canjes RecompensaOnCanje[]
 }
 
-model Respuesta {
+model RecompensaOnCanje {
+  canjeId String
+  canje   Canje  @relation(fields: [canjeId], references: [id])
+
+  recompensaId  String
+  recompensa    Recompensa @relation(fields: [recompensaId], references: [id])
+  fechaDeCanjeo DateTime   @default(now())
+  isDeleted     Boolean  @default(false)
+  @@id([canjeId, recompensaId])
+}
+
+model Intercambio {
+  id          String   @id @default(uuid())
+  pesoTotal   Int      @default(0)
+  totalPuntos Int      @default(0)
+  fecha       DateTime @default(now())
+  fechaLimite DateTime?
+  fechaRealizado DateTime?
+  estado      String   @default("pendiente")
+  isDeleted   Boolean  @default(false)
+
+  detalleIntercambio DetalleIntercambio[]
+
+  usuarioId     String
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  puntoVerdeId  String?
+  puntoVerde    PuntoVerde?  @relation(fields: [puntoVerdeId], references: [id])
+  colaboradorId String?
+  colaborador   Colaborador? @relation(fields: [colaboradorId], references: [id])
+
+  eventoId String?
+  evento   Evento? @relation(fields: [eventoId], references: [id])
+}
+
+model Residuo {
+  id       String @id @default(uuid())
+  material String
+  puntosKg Int
+  isDeleted Boolean @default(false)
+  detalleIntercambio DetalleIntercambio[]
+}
+
+model DetalleIntercambio {
   id          String @id @default(uuid())
-  description String
+  pesoGramos  Int
+  puntosTotal Int
+  isDeleted   Boolean @default(false)
+  residuoId String
+  residuo   Residuo @relation(fields: [residuoId], references: [id])
+
+  intercambioId String?
+  intercambio   Intercambio? @relation(fields: [intercambioId], references: [id])
+}
+
+model PuntoVerde {
+  id           String @id @default(uuid())
+  latitud      String
+  longitud     String
+  direccion    String
+  nombre       String
+  descripcion  String?
+  imagen       String?
+  diasAtencion String
+  horario      String
+  isDeleted    Boolean  @default(false)
+
+  colaboradorId String
+  colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
+
+  intercambio Intercambio[]
+  evento      EventoOnPuntoVerde[]
+}
+
+model Evento {
+  id            String   @id @default(uuid())
+  titulo        String
+  descripcion   String
+  imagen        String
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  codigo        String
+  multiplicador Float    @default(1.2)
+  isDeleted     Boolean  @default(false)
+
+  puntoVerde EventoOnPuntoVerde[]
+
+  intercambio Intercambio[]
+}
+
+model EventoOnPuntoVerde {
+  eventoId String
+  evento   Evento @relation(fields: [eventoId], references: [id])
+
+  puntoVerdeId String
+  puntoVerde   PuntoVerde @relation(fields: [puntoVerdeId], references: [id])
+  isDeleted    Boolean   @default(false)
+
+  @@id([eventoId, puntoVerdeId])
 }
