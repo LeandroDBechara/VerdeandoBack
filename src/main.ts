@@ -9,7 +9,6 @@ import { setupSwagger } from './config/swagger.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors(corsOptions);
-  app.setGlobalPrefix('api/v0');
 
 
   app.useGlobalInterceptors(

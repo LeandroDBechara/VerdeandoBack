@@ -1,6 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
-import { UpdatePuntosVerdeDto } from './dto/update-puntos-verde.dto';
+import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
 

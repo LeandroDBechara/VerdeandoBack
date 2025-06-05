@@ -17,7 +17,7 @@ export class UsuariosService {
           fechaDeNacimiento: newUser.fechaNacimiento,
           email: newUser.email,
           contrasenia: newUser.contraseña,
-          rol: newUser.rol as Role,
+          rol: newUser.rol,
         },
       });
       return user;
@@ -38,7 +38,7 @@ export class UsuariosService {
 
   async findOne(id: string) {
     try {
-      const user = await this.prisma.usuario.findUnique({ where: { id } });
+      const user = await this.prisma.usuario.findUnique({ where: { id, isDeleted: false } });
       return user;
     } catch (error) {
       throw new Error(error);

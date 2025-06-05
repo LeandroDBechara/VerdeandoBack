@@ -4,7 +4,12 @@ import { AppService } from './app.service';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from 'src/config/env-validation.config';
-
+import { PrismaModule } from '../prisma/prisma.module';
+import { ResiduosModule } from '../residuos/residuos.module';
+import { IntercambiosModule } from '../intercambios/intercambios.module';
+import { PuntosVerdesModule } from '../puntoVerde/puntos-verdes.module';
+import { RecompensasModule } from '../recompensas/recompensas.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -13,7 +18,14 @@ import { envValidationSchema } from 'src/config/env-validation.config';
       envFilePath: ['.env'],
       validationSchema: envValidationSchema
     }),
-    UsuariosModule],
+    PrismaModule,
+    AuthModule,
+    UsuariosModule,
+    ResiduosModule,
+    RecompensasModule,
+    PuntosVerdesModule,
+    IntercambiosModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

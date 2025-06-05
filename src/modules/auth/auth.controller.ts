@@ -6,10 +6,7 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 import { RegisterUserDto } from './dto/register.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from './guards/roles.guard';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('access-token')
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {

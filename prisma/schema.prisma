@@ -19,6 +19,12 @@ enum Role {
   COLABORADOR
 }
 
+enum EstadoIntercambio {
+  PENDIENTE
+  REALIZADO
+  CANCELADO
+}
+
 model Usuario {
   id                String   @id @default(uuid())
   nombre            String
@@ -76,10 +82,12 @@ model Canje {
   fechaDeCanjeo DateTime @default(now())
   totalPuntos   Int      @default(0)
   isDeleted     Boolean  @default(false)
+
   usuarioId String
   usuario   Usuario @relation(fields: [usuarioId], references: [id])
 
-  recompensas RecompensaOnCanje[]
+  recompensaId String
+  recompensa   Recompensa @relation(fields: [recompensaId], references: [id])
 }
 
 model Recompensa {
@@ -87,19 +95,9 @@ model Recompensa {
   titulo      String
   descripcion String
   puntos      Int
+  cantidad    Int
   isDeleted   Boolean  @default(false)
-  canjes RecompensaOnCanje[]
-}
-
-model RecompensaOnCanje {
-  canjeId String
-  canje   Canje  @relation(fields: [canjeId], references: [id])
-
-  recompensaId  String
-  recompensa    Recompensa @relation(fields: [recompensaId], references: [id])
-  fechaDeCanjeo DateTime   @default(now())
-  isDeleted     Boolean  @default(false)
-  @@id([canjeId, recompensaId])
+  canjes      Canje[]
 }
 
 model Intercambio {
@@ -109,8 +107,9 @@ model Intercambio {
   fecha       DateTime @default(now())
   fechaLimite DateTime?
   fechaRealizado DateTime?
-  estado      String   @default("pendiente")
+  estado      EstadoIntercambio   @default(PENDIENTE)
   isDeleted   Boolean  @default(false)
+  token       String?
 
   detalleIntercambio DetalleIntercambio[]
 
@@ -147,8 +146,8 @@ model DetalleIntercambio {
 
 model PuntoVerde {
   id           String @id @default(uuid())
-  latitud      String
-  longitud     String
+  latitud      Float
+  longitud     Float
   direccion    String
   nombre       String
   descripcion  String?

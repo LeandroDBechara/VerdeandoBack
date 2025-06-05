@@ -5,7 +5,8 @@ import { JwtPayload } from 'src/common/interfaces';
 
 export const hashPassword = async (password: string): Promise<string> => {
   try {
-    return await bcrypt.hash(password, +process.env.HASH_SALT);
+    const salt = process.env.HASH_SALT ? +process.env.HASH_SALT : 12;
+    return await bcrypt.hash(password, salt);
   } catch (error) {
     Logger.error('Error al generar el hash de la contraseña');
     throw error;

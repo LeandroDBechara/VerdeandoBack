@@ -10,10 +10,9 @@ export const setupSwagger = (app): void => {
   }
 
   const config = new DocumentBuilder()
-    .setTitle('API NESTJS')
-    .setDescription('Curso de nestjs, grupo 2')
-    .setVersion('1.0')
-    .addTag('Proyecto 1')
+    .setTitle('VERDEANDO')
+    .setDescription('API para el proyecto Verdeando')
+    .setVersion('0.9')
     .addBearerAuth(
       {
         type: 'http',
