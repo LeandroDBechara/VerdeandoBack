@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, IsUUID, Length, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUrl, IsUUID, Length, Min } from 'class-validator';
 
 export class CreateRecompensaDto {
   @ApiProperty({ description: 'Titulo', example: 'Recompensa 1' })
@@ -25,6 +25,12 @@ export class CreateRecompensaDto {
   @Min(0, { message: 'La cantidad mínima es 0' })
   @IsNotEmpty({ message: 'La cantidad es requerida' })
   cantidad: number;
+
+  @ApiProperty({ description: 'Foto', example: 'https://www.google.com/foto.jpg' })
+  @IsString({ message: 'La foto debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'La foto es requerida' })
+  @IsUrl({},{ message: 'La foto debe ser una URL válida' })
+  foto?: string;
 }
 
 export class CreateCanjeDto {

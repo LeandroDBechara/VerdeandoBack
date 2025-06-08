@@ -1,5 +1,20 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsJWT, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsJWT, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Min, ValidateNested } from 'class-validator';
+
+export class CreateDetalleIntercambioDto {
+  @ApiProperty({ description: 'Residue id', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @IsNotEmpty({ message: 'El residuo es requerido' })
+  @IsUUID(4, { message: 'El residuo debe ser un UUID válido' })
+  @IsString({ message: 'El residuo debe ser una cadena de texto' })
+  residuoId: string;
+
+  @ApiProperty({ description: 'Weight', example: 100 })
+  @IsNotEmpty({ message: 'El peso es requerido' })
+  @IsNumber({allowInfinity: false }, { message: 'El peso debe ser un número' })
+  @Min(0, { message: 'El peso debe ser un número positivo' })
+  pesoGramos: number;
+}
 
 export class CreateIntercambioDto {
 
@@ -15,21 +30,15 @@ export class CreateIntercambioDto {
   @Length(0, 6, { message: 'El código del cupón debe tener 6 caracteres' })
   codigoCupon?: string;
 
+  @ApiProperty({ description: 'Detalles del intercambio', type: [CreateDetalleIntercambioDto] })
+  @IsNotEmpty({ message: 'Los detalles del intercambio son requeridos' })
+  @IsArray({ message: 'Los detalles del intercambio deben ser un array' })
+  @ValidateNested({ each: true })
+  @Type(() => CreateDetalleIntercambioDto)
+  detalles: CreateDetalleIntercambioDto[];
 }
 
-export class CreateDetalleIntercambioDto {
-  @ApiProperty({ description: 'Residue id', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @IsNotEmpty({ message: 'El residuo es requerido' })
-  @IsUUID(4, { message: 'El residuo debe ser un UUID válido' })
-  @IsString({ message: 'El residuo debe ser una cadena de texto' })
-  residuoId: string;
 
-  @ApiProperty({ description: 'Weight', example: 100 })
-  @IsNotEmpty({ message: 'El peso es requerido' })
-  @IsNumber({allowInfinity: false }, { message: 'El peso debe ser un número' })
-  @Min(0, { message: 'El peso debe ser un número positivo' })
-  pesoGramos: number;
-}
 
 export class ConfirmarIntercambioDto {
   @ApiProperty({ description: 'Token', example: '123456' })

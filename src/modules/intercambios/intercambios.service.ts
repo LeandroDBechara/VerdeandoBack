@@ -2,21 +2,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfirmarIntercambioDto, CreateDetalleIntercambioDto, CreateIntercambioDto, UpdateIntercambioDto } from './dto/create-intercambio.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { EventosService } from '../eventos/eventos.service';
 
 @Injectable()
 export class IntercambiosService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly eventosService: EventosService
   ) {}
 
-  async create(createIntercambioDto: CreateIntercambioDto, createDetalleIntercambioDto: CreateDetalleIntercambioDto[]) {
+  async create(createIntercambioDto: CreateIntercambioDto) {
     try {
       let pesoTotal = 0;
       let puntosTotal = 0;
       const detalles: { residuoId: string; pesoGramos: number; puntosTotal: number }[] = [];
       // Calcular totales primero
-      for (const detalle of createDetalleIntercambioDto) {
+      for (const detalle of createIntercambioDto.detalles) {
         const residuo = await this.prisma.residuo.findUnique({
           where: { id: detalle.residuoId }
         });
@@ -30,20 +32,23 @@ export class IntercambiosService {
           });
         }
       }
-      
-      const evento = await this.prisma.evento.findFirst({
-        where: { codigo: createIntercambioDto.codigoCupon }
-      });
-      if (evento) {
-        puntosTotal = evento.multiplicador * puntosTotal;
+      // Validar si el codigo de cupon es valido
+      let eventoId: string | null = null;
+      if(createIntercambioDto.codigoCupon){
+        const evento = await this.eventosService.validarCodigo(createIntercambioDto.codigoCupon);
+        if(evento){
+          puntosTotal = evento.multiplicador * puntosTotal;
+          eventoId = evento.id;
+        }
       }
 
       const intercambio = await this.prisma.intercambio.create({
         data: {
           usuarioId: createIntercambioDto.usuarioId,
-          eventoId: evento?.id,
+          eventoId: eventoId,
           pesoTotal: pesoTotal,
           totalPuntos: puntosTotal,
+          fechaLimite: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
           detalleIntercambio: {
             create: detalles
           }
@@ -106,6 +111,24 @@ export class IntercambiosService {
         throw new NotFoundException('Punto Verde no encontrado');
       }
 
+      if(intercambio.eventoId){
+        const evento = await this.prisma.evento.findUnique({
+          where: { id: intercambio.eventoId, isDeleted: false }
+        });
+        if(!evento){
+          throw new NotFoundException('Evento no encontrado');
+        }
+        if(!evento.puntosVerdesPermitidos.includes(puntoVerdeId)){
+          throw new NotFoundException('Punto Verde no permitido para este evento');
+        }
+        if(evento.fechaFin < new Date()){
+          throw new NotFoundException('El evento ha finalizado');
+        }
+        if(evento.fechaInicio > new Date()){
+          throw new NotFoundException('El evento no ha comenzado');
+        }
+      }
+
       const intercambioActualizado = await this.prisma.intercambio.update({
         where: { id: intercambioId },
         data: { fechaRealizado: new Date(),
@@ -149,15 +172,39 @@ export class IntercambiosService {
   }
 
   async findAllByUsuarioId(usuarioId: string) {
-    return this.prisma.intercambio.findMany({
+    const intercambios = await this.prisma.intercambio.findMany({
       where: { usuarioId, isDeleted: false }
     });
+    for(const intercambio of intercambios){
+      if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
+        await this.prisma.intercambio.update({
+          where: { id: intercambio.id },
+          data: { estado: "EXPIRADO" }
+        });
+      }
+    }
+    const intercambiosActualizados = await this.prisma.intercambio.findMany({
+      where: { usuarioId, isDeleted: false }
+    });
+    return intercambiosActualizados;
   }
 
-  findAll() {
-    return this.prisma.intercambio.findMany({
+  async findAll() {
+    const intercambios = await this.prisma.intercambio.findMany({
       where: { isDeleted: false }
     });
+    for(const intercambio of intercambios){
+      if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
+        await this.prisma.intercambio.update({
+          where: { id: intercambio.id },  
+          data: { estado: "EXPIRADO" }
+        });
+      }
+    }
+    const intercambiosActualizados = await this.prisma.intercambio.findMany({
+      where: { isDeleted: false }
+    });
+    return intercambiosActualizados;
   }
 
   findOne(id: string) {

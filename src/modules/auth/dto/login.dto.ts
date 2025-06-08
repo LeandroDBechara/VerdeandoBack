@@ -11,5 +11,5 @@ export class LoginAuthDto {
   @IsString({ message: 'La contraseña debe ser un string' })
   @IsNotEmpty({ message: 'La contraseña es requerida' })
   @MinLength(8,{message: 'La contraseña debe tener al menos 8 caracteres'})
-  contraseña: string;
+  password: string;
 }

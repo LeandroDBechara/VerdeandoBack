@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {IsDateString, IsEmail, IsNotEmpty, IsString, Length, MinLength} from 'class-validator';
+import { Transform } from 'class-transformer';
+import {IsDate, IsDateString, IsEmail, IsNotEmpty, IsString, Length, MinLength} from 'class-validator';
 
 export class RegisterUserDto {
   @ApiProperty({description: 'User name',example: 'joe'})
@@ -23,10 +24,18 @@ export class RegisterUserDto {
   @IsString({message: 'La contraseña debe ser un string'})
   @IsNotEmpty({message: 'La contraseña es requerida'})
   @MinLength(8,{message: 'La contraseña debe tener al menos 8 caracteres'})
-  contraseña: string;
+  password: string;
 
-  @ApiProperty({description: 'User birth date',example: '2025-01-01'})
-  @IsDateString({},{message: 'La fecha de nacimiento debe ser una fecha'})
+  @ApiProperty({description: 'User birth date',example: '1996-04-27T00:00:00.000Z'})
+  @Transform(({ value }) => {
+    if (!value) return value;
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new Error('La fecha de nacimiento debe ser una fecha válida');
+    }
+    return date;
+  })
+  @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
   @IsNotEmpty({message: 'La fecha de nacimiento es requerida'})
   fechaDeNacimiento: Date;
   

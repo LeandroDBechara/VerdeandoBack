@@ -21,7 +21,7 @@ export class AuthService {
   async register(user: RegisterUserDto) {
     try {
  
-      if (!user.email || !user.contraseña || !user.nombre || !user.apellido || !user.fechaDeNacimiento) {
+      if (!user.email || !user.password || !user.nombre || !user.apellido || !user.fechaDeNacimiento) {
         
       const message = 'Los campos son requeridos';
         throw new CustomError(message, HttpStatus.BAD_REQUEST); // 400
@@ -42,14 +42,15 @@ export class AuthService {
         throw new CustomError(message, HttpStatus.CONFLICT); // 409
       }
       
-      const hashedPassword = await hashPassword(user.contraseña);
+      const hashedPassword = await hashPassword(user.password);
       const email = user.email.toLowerCase();
   
       const newUser = await this.prisma.usuario.create({
         data: {
           ...user,
           email,
-          contrasenia: hashedPassword,
+          password: hashedPassword,
+          
         },
       });
   
@@ -89,7 +90,7 @@ export class AuthService {
 
   async login(credentials: LoginAuthDto) {
     try {
-      const { contraseña } = credentials;
+      const { password } = credentials;
 
       const findUser = await this.prisma.usuario.findFirst({
         where: {
@@ -107,8 +108,8 @@ export class AuthService {
       }
    
       const isCorrectPassword = await comparePassword(
-        contraseña,
-        findUser.contrasenia,
+        password,
+        findUser.password,
       );
 
       if (!isCorrectPassword) {
@@ -191,7 +192,8 @@ export class AuthService {
 
       const message = 'Email enviado';
       return {
-        message
+        message,
+        accessToken,
       };
 
     } catch (error) {
@@ -236,7 +238,7 @@ export class AuthService {
       await this.prisma.usuario.update({
         where: { id },
         data: {
-          contrasenia: await hashPassword(password),
+          password: await hashPassword(password),
         },
       });
 

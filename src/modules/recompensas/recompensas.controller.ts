@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { RecompensasService } from './recompensas.service';
-import { CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
+import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
@@ -25,6 +25,18 @@ export class RecompensasController {
   @Post()
   create(@Body() createRecompensaDto: CreateRecompensaDto) {
     return this.recompensasService.create(createRecompensaDto);
+  }
+
+  @ApiCustomOperation({
+    summary: 'Crear un canje',
+    bodyType: CreateCanjeDto,
+    responseStatus: 200,
+    responseDescription: 'Canje creado correctamente',
+  })
+  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  @Post('canje')
+  createCanje(@Body() createCanjeDto: CreateCanjeDto) {
+    return this.recompensasService.createCanje(createCanjeDto);
   }
 
   @ApiCustomOperation({

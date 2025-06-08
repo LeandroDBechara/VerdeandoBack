@@ -23,7 +23,11 @@ enum EstadoIntercambio {
   PENDIENTE
   REALIZADO
   CANCELADO
+  EXPIRADO
 }
+
+//Falta: comunidad(consultar con grupo);
+//caminos no felices
 
 model Usuario {
   id                String   @id @default(uuid())
@@ -31,7 +35,7 @@ model Usuario {
   apellido          String
   fechaDeNacimiento DateTime
   email             String   @unique
-  contrasenia       String
+  password          String
   fotoPerfil        String?
   puntos            Int      @default(0)
   direccion         String?
@@ -94,6 +98,7 @@ model Recompensa {
   id          String @id @default(uuid())
   titulo      String
   descripcion String
+  foto        String?
   puntos      Int
   cantidad    Int
   isDeleted   Boolean  @default(false)
@@ -158,34 +163,20 @@ model PuntoVerde {
 
   colaboradorId String
   colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
-
   intercambio Intercambio[]
-  evento      EventoOnPuntoVerde[]
 }
 
 model Evento {
   id            String   @id @default(uuid())
   titulo        String
   descripcion   String
-  imagen        String
+  imagen        String?
   fechaInicio   DateTime
   fechaFin      DateTime
   codigo        String
   multiplicador Float    @default(1.2)
+  puntosVerdesPermitidos String[]
   isDeleted     Boolean  @default(false)
 
-  puntoVerde EventoOnPuntoVerde[]
-
   intercambio Intercambio[]
-}
-
-model EventoOnPuntoVerde {
-  eventoId String
-  evento   Evento @relation(fields: [eventoId], references: [id])
-
-  puntoVerdeId String
-  puntoVerde   PuntoVerde @relation(fields: [puntoVerdeId], references: [id])
-  isDeleted    Boolean   @default(false)
-
-  @@id([eventoId, puntoVerdeId])
 }

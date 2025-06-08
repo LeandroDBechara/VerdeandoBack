@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import { CreateColaboradorDto, CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -25,6 +25,18 @@ export class UsuariosController {
   @Roles(RoleEnum.ADMIN)
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuariosService.create(createUsuarioDto);
+  }
+
+  @ApiCustomOperation({
+    summary: 'Crear un colaborador',
+    bodyType: CreateColaboradorDto,
+    responseStatus: 200,
+    responseDescription: 'Colaborador creado correctamente',
+  })
+  @Post('/colaborador')
+  @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
+  createColaborador(@Body() createColaboradorDto: CreateColaboradorDto) {
+    return this.usuariosService.serColaborador(createColaboradorDto);
   }
 
   @ApiCustomOperation({

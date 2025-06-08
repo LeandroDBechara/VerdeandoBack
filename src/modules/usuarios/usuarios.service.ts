@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import { CreateColaboradorDto, CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 
@@ -16,7 +16,7 @@ export class UsuariosService {
           apellido: newUser.apellido,
           fechaDeNacimiento: newUser.fechaNacimiento,
           email: newUser.email,
-          contrasenia: newUser.contraseña,
+          password: newUser.password,
           rol: newUser.rol,
         },
       });
@@ -24,6 +24,23 @@ export class UsuariosService {
     } catch (error) {
       throw new Error(error);
     }
+  }
+  async serColaborador(createColaboradorDto: CreateColaboradorDto) {
+    const colaborador = await this.prisma.colaborador.create({
+      data: {
+        cvu: createColaboradorDto.cvu,
+        domicilioFiscal: createColaboradorDto.domicilioFiscal,
+        cuitCuil: createColaboradorDto.cuitCuil,
+        usuarioId: createColaboradorDto.usuarioId,
+      }
+    });
+    await this.prisma.usuario.update({
+      where: { id: createColaboradorDto.usuarioId },
+      data: {
+        rol: Role.COLABORADOR,
+      }
+    });
+    return colaborador;
   }
 
 

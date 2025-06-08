@@ -13,7 +13,7 @@ export class RecompensasService {
     });
   }
 
-  async   createCanje(createCanjeDto: CreateCanjeDto) {
+  async createCanje(createCanjeDto: CreateCanjeDto) {
     try {
       const { recompensaId, usuarioId } = createCanjeDto;
       const recompensa = await this.prisma.recompensa.findUnique({

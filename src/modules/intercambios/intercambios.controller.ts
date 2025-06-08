@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { IntercambiosService } from './intercambios.service';
 import {
-  CreateDetalleIntercambioDto,
   CreateIntercambioDto,
   UpdateIntercambioDto,
   ConfirmarIntercambioDto,
@@ -22,7 +21,7 @@ export class IntercambiosController {
 
   @ApiCustomOperation({
     summary: 'Crear un intercambio',
-    bodyType: [CreateIntercambioDto, CreateDetalleIntercambioDto],
+    bodyType: CreateIntercambioDto,
     responseStatus: 200,
     responseDescription: 'Intercambio creado correctamente',
   })
@@ -30,9 +29,8 @@ export class IntercambiosController {
   @Post()
   async create(
     @Body() createIntercambioDto: CreateIntercambioDto,
-    @Body() createDetalleIntercambioDto: CreateDetalleIntercambioDto[],
   ) {
-    return this.intercambiosService.create(createIntercambioDto, createDetalleIntercambioDto);
+    return this.intercambiosService.create(createIntercambioDto);
   }
 
   @ApiCustomOperation({
