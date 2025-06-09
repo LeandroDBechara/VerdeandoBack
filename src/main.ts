@@ -22,14 +22,14 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  const PORT = configService.get<number>('PORT');
+  const PORT = configService.get<number>('PORT')|| 4000;
   const NODE_ENV = configService.get<string>('NODE_ENV');
 
   app.useGlobalInterceptors(new LogguerInterceptor());
   
-  await app.listen(PORT || 3000, () => {
+  await app.listen(PORT, '0.0.0.0', () => {
     Logger.log(
-      `Application running the port: http://localhost:${PORT}/api`,
+      `Application running the port: http://0.0.0.0:${PORT}/api`,
       NestApplication.name,
     );
     Logger.log(`Current environment: ${NODE_ENV}`, NestApplication.name);
