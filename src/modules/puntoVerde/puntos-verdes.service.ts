@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
+import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto, ValidarPuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
 
@@ -29,6 +29,23 @@ export class PuntosVerdesService {
     return puntosVerde;
     } catch (error) {
       throw new CustomError('Error al crear el punto verde', HttpStatus.BAD_REQUEST);
+    }
+  }
+  async verificarExistenciaPuntoVerde(location: ValidarPuntosVerdeDto) {
+    try {
+      const existPV = await this.prisma.puntoVerde.findFirst({
+        where: {
+          latitud: location.latitude+- 0.00015, // Ajuste para verificar proximidad
+          longitud: location.longitude+- 0.00015, // Ajuste para verificar proximidad
+          isDeleted: false,
+        },
+      });
+      if (!existPV) {
+        throw new CustomError('No existe un punto verde en esta ubicación', HttpStatus.BAD_REQUEST);
+      }
+      return existPV;
+      } catch (error) {
+      throw new CustomError('Error al verificar la existencia del punto verde', HttpStatus.BAD_REQUEST);  
     }
   }
 

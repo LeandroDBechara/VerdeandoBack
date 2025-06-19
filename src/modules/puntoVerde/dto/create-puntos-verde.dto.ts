@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, Max, Min, IsUrl, Length, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Max, Min, IsUrl, Length, IsUUID, IsArray } from 'class-validator';
 
 export class CreatePuntosVerdeDto {
     @ApiProperty({ description: 'Latitud', example: 10.0 })
@@ -52,5 +52,15 @@ export class CreatePuntosVerdeDto {
     @IsString({ message: 'El colaborador debe ser una cadena de texto' })
     @IsNotEmpty({ message: 'El colaborador es requerido' })
     colaboradorId: string;
+    
+    @ApiProperty({ description: 'Materiales aceptados', example: ['Plástico', 'Vidrio'] })
+    @IsString({ each: true, message: 'Los materiales aceptados deben ser cadenas de texto' })
+    @IsArray({ message: 'Los materiales aceptados deben ser un arreglo' })
+    residuosAceptados?: string[];
+}
+export class ValidarPuntosVerdeDto {
+    
+        latitude: number;
+        longitude: number;
 }
 export class UpdatePuntosVerdeDto extends PartialType(CreatePuntosVerdeDto) {}

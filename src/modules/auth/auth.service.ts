@@ -100,6 +100,9 @@ export class AuthService {
           },
           isDeleted:false,
         },
+        include: {
+          colaborador: true,
+        },
       });
       
       if (!findUser) {

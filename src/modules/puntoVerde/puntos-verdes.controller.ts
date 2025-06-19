@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { PuntosVerdesService } from './puntos-verdes.service';
-import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
+import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto, ValidarPuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -25,6 +25,17 @@ export class PuntosVerdesController {
   @Post()
   create(@Body() createPuntosVerdeDto: CreatePuntosVerdeDto) {
     return this.puntosVerdesService.create(createPuntosVerdeDto);
+  }
+  @ApiCustomOperation({
+    summary: 'Verificar existencia de un punto verde por ubicación',
+    responseStatus: 200,
+    bodyType: ValidarPuntosVerdeDto,
+    responseDescription: 'Punto verde obtenido correctamente',
+  })
+  @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  @Post('/verificar')
+  verificarExistenciaPuntoVerde(@Body() location: ValidarPuntosVerdeDto) {
+    return this.puntosVerdesService.verificarExistenciaPuntoVerde(location);
   }
 
   @ApiCustomOperation({

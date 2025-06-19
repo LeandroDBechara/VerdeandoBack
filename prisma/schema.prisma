@@ -160,6 +160,7 @@ model PuntoVerde {
   diasAtencion String
   horario      String
   isDeleted    Boolean  @default(false)
+  residuosAceptados String[]
 
   colaboradorId String
   colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
