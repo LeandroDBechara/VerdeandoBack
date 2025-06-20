@@ -9,7 +9,7 @@ export class PuntosVerdesService {
 
   async create(createPuntosVerdeDto: CreatePuntosVerdeDto) {
     try {
-      const { descripcion, imagen, residuosAceptados, ...puntosVerdeData } = createPuntosVerdeDto;
+      const { descripcion, imagen, ...puntosVerdeData } = createPuntosVerdeDto;
       const existPV = await this.prisma.puntoVerde.findFirst({
         where: {
         direccion: puntosVerdeData.direccion,
@@ -24,7 +24,6 @@ export class PuntosVerdesService {
         ...puntosVerdeData,
         descripcion: descripcion,
         imagen: imagen,
-        residuosAceptados:residuosAceptados ? residuosAceptados : [],
       },
     });
     return puntosVerde;
@@ -57,19 +56,6 @@ export class PuntosVerdesService {
           isDeleted: false,
           //revisar que no se muestre el colaborador el id ni los intercambios y eventos
       },
-        select: {
-          id: true,
-          nombre: true,
-          direccion: true,
-          latitud: true,
-          longitud: true,
-          descripcion: true,
-          imagen: true,
-          diasAtencion: true,
-          horario: true,
-          residuosAceptados: true,
-          colaboradorId: true, // Si necesitas el id del colaborador
-        },
     });
     return puntosVerdes;
     } catch (error) {
