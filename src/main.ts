@@ -29,7 +29,7 @@ async function bootstrap() {
   
   await app.listen(PORT, '0.0.0.0', () => {
     Logger.log(
-      `Application running the port: http://0.0.0.0:${PORT}/api`,
+      `Application running the port: http://0.0.0.0:${PORT}/api or https://verdeandoback.onrender.com/api`,
       NestApplication.name,
     );
     Logger.log(`Current environment: ${NODE_ENV}`, NestApplication.name);
