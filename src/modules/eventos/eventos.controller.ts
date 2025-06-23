@@ -28,6 +28,17 @@ export class EventosController {
   }
 
   @ApiCustomOperation({
+    summary: 'Obtener todos los eventos',
+    responseStatus: 200,
+    responseDescription: 'Eventos obtenidos correctamente',
+  })
+  @Roles(RoleEnum.ADMIN, RoleEnum.USUARIO, RoleEnum.COLABORADOR)
+  @Get()
+  findAll() {
+    return this.eventosService.findAll();
+  }
+
+  @ApiCustomOperation({
     summary: 'Obtener un evento por id',
     responseStatus: 200,
     responseDescription: 'Evento obtenido correctamente',

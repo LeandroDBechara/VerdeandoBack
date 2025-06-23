@@ -10,6 +10,7 @@ import { IntercambiosModule } from '../intercambios/intercambios.module';
 import { PuntosVerdesModule } from '../puntoVerde/puntos-verdes.module';
 import { RecompensasModule } from '../recompensas/recompensas.module';
 import { AuthModule } from '../auth/auth.module';
+import { EventosModule } from '../eventos/eventos.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthModule } from '../auth/auth.module';
     RecompensasModule,
     PuntosVerdesModule,
     IntercambiosModule,
+    EventosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

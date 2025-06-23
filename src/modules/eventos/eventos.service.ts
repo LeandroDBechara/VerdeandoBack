@@ -26,6 +26,7 @@ export class EventosService {
       data: createEventoDto,
     });
   }
+
   async validarCodigo(codigo: string) {
     const evento = await this.prisma.evento.findFirst({
       where: { codigo },
@@ -42,8 +43,23 @@ export class EventosService {
     return evento;
   }
 
-  findAll() {
-    return this.prisma.evento.findMany();
+  async findAll() {
+    return this.prisma.evento.findMany({
+      where: {
+        fechaFin: { gte: new Date() },
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        titulo: true,
+        descripcion: true,
+        imagen: true,
+        fechaInicio: true,
+        fechaFin: true,
+        codigo: true,
+        puntosVerdesPermitidos: true,
+      },
+    });
   }
 
   findOne(id: string) {
