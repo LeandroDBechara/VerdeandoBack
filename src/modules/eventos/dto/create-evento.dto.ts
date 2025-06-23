@@ -1,4 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID } from 'class-validator';
 
 export class CreateEventoDto {
@@ -19,12 +20,26 @@ export class CreateEventoDto {
   imagen?: string;
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '2025-01-01' })
-  @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
+  @Transform(({ value }) => {
+    if (!value) return value;
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new Error('La fecha de inicio debe ser una fecha válida');
+    }
+    return date;
+  })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida' })
   fechaInicio: Date;
 
   @ApiProperty({ description: 'Fecha de fin del evento', example: '2025-01-01' })
-  @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
+  @Transform(({ value }) => {
+    if (!value) return value;
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new Error('La fecha de fin debe ser una fecha válida');
+    }
+    return date;
+  })
   @IsNotEmpty({ message: 'La fecha de fin es requerida' })
   fechaFin: Date;
 
