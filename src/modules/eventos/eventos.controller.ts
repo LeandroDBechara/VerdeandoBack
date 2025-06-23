@@ -8,8 +8,8 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('access-token')
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @ApiTags('Eventos')
 @Controller('eventos')
 export class EventosController {

@@ -8,9 +8,9 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 
-@ApiBearerAuth('access-token')
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @ApiTags('Usuarios')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}

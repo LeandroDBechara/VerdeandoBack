@@ -12,8 +12,8 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('access-token')
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @ApiTags('Intercambios')
 @Controller('intercambios')
 export class IntercambiosController {

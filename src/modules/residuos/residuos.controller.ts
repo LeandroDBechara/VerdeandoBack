@@ -8,9 +8,9 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 
-@ApiBearerAuth('access-token')
 @ApiTags('Residuos')
-@UseGuards(JwtAuthGuard, RolesGuard)
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @Controller('residuos')
 export class ResiduosController {
   constructor(private readonly residuosService: ResiduosService) {}

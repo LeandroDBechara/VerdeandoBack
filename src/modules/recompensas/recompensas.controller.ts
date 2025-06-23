@@ -8,9 +8,9 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
-@ApiBearerAuth('access-token')
 @ApiTags('Recompensas')
-@UseGuards(JwtAuthGuard, RolesGuard)
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @Controller('recompensas')
 export class RecompensasController {
   constructor(private readonly recompensasService: RecompensasService) {}

@@ -8,8 +8,8 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from '../../common/decorators/roles.decorators';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth('access-token')
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@ApiBearerAuth('access-token')
 @ApiTags('Puntos Verdes')
 @Controller('puntos-verdes')
 export class PuntosVerdesController {
