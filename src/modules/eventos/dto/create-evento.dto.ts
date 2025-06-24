@@ -19,24 +19,54 @@ export class CreateEventoDto {
   @IsUrl({},{ message: 'La imagen debe ser una URL válida' })
   imagen?: string;
 
-  @ApiProperty({ description: 'Fecha de inicio del evento', example: '2025-01-01' })
+  @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
   @Transform(({ value }) => {
     if (!value) return value;
+    
+    // Verificar si el formato es DD-MM-YYYY
+    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = value.match(dateRegex);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+      if (isNaN(date.getTime())) {
+        throw new Error('La fecha de inicio debe ser una fecha válida');
+      }
+      return date;
+    }
+    
+    // Fallback para otros formatos de fecha
     const date = new Date(value);
     if (isNaN(date.getTime())) {
-      throw new Error('La fecha de inicio debe ser una fecha válida');
+      throw new Error('La fecha de inicio debe ser una fecha válida en formato DD-MM-YYYY');
     }
     return date;
   })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida' })
   fechaInicio: Date;
 
-  @ApiProperty({ description: 'Fecha de fin del evento', example: '2025-01-01' })
+  @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
   @Transform(({ value }) => {
     if (!value) return value;
+    
+    // Verificar si el formato es DD-MM-YYYY
+    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+    const match = value.match(dateRegex);
+    
+    if (match) {
+      const [, day, month, year] = match;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+      if (isNaN(date.getTime())) {
+        throw new Error('La fecha de inicio debe ser una fecha válida');
+      }
+      return date;
+    }
+    
+    // Fallback para otros formatos de fecha
     const date = new Date(value);
     if (isNaN(date.getTime())) {
-      throw new Error('La fecha de fin debe ser una fecha válida');
+      throw new Error('La fecha de inicio debe ser una fecha válida en formato DD-MM-YYYY');
     }
     return date;
   })
