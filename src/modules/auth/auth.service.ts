@@ -44,6 +44,8 @@ export class AuthService {
       
       const hashedPassword = await hashPassword(user.password);
       const email = user.email.toLowerCase();
+      
+      
   
       const newUser = await this.prisma.usuario.create({
         data: {

@@ -1,6 +1,7 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID } from 'class-validator';
+import { transformDateString } from 'src/utils/date-transformer';
 
 export class CreateEventoDto {
   @ApiProperty({ description: 'Título del evento', example: 'Evento de prueba' })
@@ -20,58 +21,18 @@ export class CreateEventoDto {
   imagen?: string;
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
-  @Transform(({ value }) => {
-    if (!value) return value;
-    
-    // Verificar si el formato es DD-MM-YYYY
-    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-    const match = value.match(dateRegex);
-    
-    if (match) {
-      const [, day, month, year] = match;
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
-      if (isNaN(date.getTime())) {
-        throw new Error('La fecha de inicio debe ser una fecha válida');
-      }
-      return date;
-    }
-    
-    // Fallback para otros formatos de fecha
-    const date = new Date(value);
-    if (isNaN(date.getTime())) {
-      throw new Error('La fecha de inicio debe ser una fecha válida en formato DD-MM-YYYY');
-    }
-    return date;
-  })
+  @Transform(({ value }) => transformDateString(value, 'La fecha de inicio'))
+  @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida' })
   fechaInicio: Date;
 
+
   @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
-  @Transform(({ value }) => {
-    if (!value) return value;
-    
-    // Verificar si el formato es DD-MM-YYYY
-    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-    const match = value.match(dateRegex);
-    
-    if (match) {
-      const [, day, month, year] = match;
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
-      if (isNaN(date.getTime())) {
-        throw new Error('La fecha de inicio debe ser una fecha válida');
-      }
-      return date;
-    }
-    
-    // Fallback para otros formatos de fecha
-    const date = new Date(value);
-    if (isNaN(date.getTime())) {
-      throw new Error('La fecha de inicio debe ser una fecha válida en formato DD-MM-YYYY');
-    }
-    return date;
-  })
+  @Transform(({ value }) => transformDateString(value, 'La fecha de fin'))
+  @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de fin es requerida' })
   fechaFin: Date;
+
 
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsString({ message: 'El código debe ser una cadena de texto' })

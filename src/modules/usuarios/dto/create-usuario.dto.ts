@@ -4,6 +4,7 @@ import { Role } from "@prisma/client";
 import { Transform } from "class-transformer";
 import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate } from "class-validator";
 import { ValidarCuit } from "src/utils/cuitValidation";
+import { transformDateString } from "src/utils/date-transformer";
 
 
 export class CreateUsuarioDto {
@@ -19,8 +20,8 @@ export class CreateUsuarioDto {
     @Length(2, 40, { message: 'El apellido debe tener entre 2 y 40 caracteres' })
     apellido:string;
     
-    @ApiProperty({ description: 'Fecha de nacimiento', example: '2000-01-01' })
-    @Transform(({ value }) => new Date(value))
+    @ApiProperty({ description: 'Fecha de nacimiento', example: '01-01-2000' })
+    @Transform(({ value }) => transformDateString(value, 'La fecha de nacimiento'))
     @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
     @IsNotEmpty({message: 'La fecha de nacimiento es requerida'})
     fechaNacimiento:Date;

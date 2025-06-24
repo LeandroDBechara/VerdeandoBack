@@ -1,5 +1,5 @@
 import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
-import { ClassSerializerInterceptor, Logger} from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe} from '@nestjs/common';
 import { AppModule } from './modules/app/app.module';
 import { LogguerInterceptor } from './common/interceptors/logguer.interceptor';
 import { corsOptions } from './config/cors.config';
@@ -9,6 +9,11 @@ import { setupSwagger } from './config/swagger.config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors(corsOptions);
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
 
 
   app.useGlobalInterceptors(

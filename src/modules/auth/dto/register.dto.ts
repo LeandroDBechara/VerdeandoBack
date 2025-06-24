@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {IsDate, IsDateString, IsEmail, IsNotEmpty, IsString, Length, MinLength} from 'class-validator';
+import {IsEmail, IsNotEmpty, IsString, Length, MinLength, IsDate} from 'class-validator';
+import { transformDateString } from 'src/utils/date-transformer';
 
 export class RegisterUserDto {
   @ApiProperty({description: 'User name',example: 'joe'})
@@ -26,32 +27,10 @@ export class RegisterUserDto {
   @MinLength(8,{message: 'La contraseña debe tener al menos 8 caracteres'})
   password: string;
 
-  @ApiProperty({description: 'User birth date',example: '27-04-1996'})
-  @Transform(({ value }) => {
-    if (!value) return value;
-    
-    // Verificar si el formato es DD-MM-YYYY
-    const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-    const match = value.match(dateRegex);
-    
-    if (match) {
-      const [, day, month, year] = match;
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
-      if (isNaN(date.getTime())) {
-        throw new Error('La fecha de nacimiento debe ser una fecha válida');
-      }
-      return date;
-    }
-    
-    // Fallback para otros formatos de fecha
-    const date = new Date(value);
-    if (isNaN(date.getTime())) {
-      throw new Error('La fecha de nacimiento debe ser una fecha válida en formato DD-MM-YYYY');
-    }
-    return date;
-  })
-  @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
+  @ApiProperty({description: 'User birth date',example: '20-04-1996'})
   @IsNotEmpty({message: 'La fecha de nacimiento es requerida'})
+  @Transform(({ value }) => transformDateString(value, 'La fecha de nacimiento'))
+  @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
   fechaDeNacimiento: Date;
   
 }

@@ -22,8 +22,8 @@ export class UsuariosService {
       });
       return user;
     } catch (error) {
-      throw new Error(error);
-    }
+      console.error('Error al crear usuario:', error);
+      throw error;}
   }
   async serColaborador(createColaboradorDto: CreateColaboradorDto) {
     const colaborador = await this.prisma.colaborador.create({
