@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateColaboradorDto, CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 
@@ -25,6 +25,7 @@ export class UsuariosService {
       console.error('Error al crear usuario:', error);
       throw error;}
   }
+
   async serColaborador(createColaboradorDto: CreateColaboradorDto) {
     const colaborador = await this.prisma.colaborador.create({
       data: {
@@ -41,6 +42,18 @@ export class UsuariosService {
       }
     });
     return colaborador;
+  }
+
+  async updateColaborador(colaboradorId:string, updateColaboradorDto: UpdateColaboradorDto) {
+    try {
+      const colaborador = await this.prisma.colaborador.update({
+        where: { id: colaboradorId },
+        data: updateColaboradorDto,
+      });
+      return colaborador;
+    } catch (error) {
+      throw  Error(error);
+    }
   }
 
 

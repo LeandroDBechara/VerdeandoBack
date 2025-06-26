@@ -72,3 +72,4 @@ export class CreateColaboradorDto {
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
+export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {}

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateColaboradorDto, CreateUsuarioDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -37,6 +37,19 @@ export class UsuariosController {
   @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
   createColaborador(@Body() createColaboradorDto: CreateColaboradorDto) {
     return this.usuariosService.serColaborador(createColaboradorDto);
+  }
+
+  @ApiCustomOperation({
+    summary: 'Actualizar un colaborador',
+    bodyType: UpdateColaboradorDto,
+    responseStatus: 200,
+    responseDescription: 'Colaborador actualizado correctamente',
+  })
+
+  @Patch('/colaborador/:id')
+  @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
+  updateColaborador(@Param('id') id: string, @Body() updateColaboradorDto: UpdateColaboradorDto) {
+    return this.usuariosService.updateColaborador(id, updateColaboradorDto);
   }
 
   @ApiCustomOperation({
