@@ -63,7 +63,7 @@ export class RecompensasController {
 
   @ApiCustomOperation({
     summary: 'Actualizar una recompensa por id',
-    bodyType: UpdateRecompensaDto,
+    bodyType: CreateRecompensaDto,
     responseStatus: 200,
     responseDescription: 'Recompensa actualizada correctamente',
   })

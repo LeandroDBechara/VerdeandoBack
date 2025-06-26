@@ -52,7 +52,7 @@ export class EventosController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un evento',
-    bodyType: UpdateEventoDto,
+    bodyType: CreateEventoDto,
     responseStatus: 200,
     responseDescription: 'Evento actualizado correctamente',
   })

@@ -55,7 +55,7 @@ export class ResiduosController {
   @ApiCustomOperation({
 
     summary: 'Actualizar un residuo por id',
-    bodyType: UpdateResiduoDto,
+    bodyType: CreateResiduoDto,
     responseStatus: 200,
     responseDescription: 'Residuo actualizado correctamente',
   })

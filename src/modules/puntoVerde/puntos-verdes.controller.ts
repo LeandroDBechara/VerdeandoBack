@@ -62,7 +62,7 @@ export class PuntosVerdesController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un punto verde por id',
-    bodyType: UpdatePuntosVerdeDto,
+    bodyType: CreatePuntosVerdeDto,
     responseStatus: 200,
     responseDescription: 'Punto verde actualizado correctamente',
   })

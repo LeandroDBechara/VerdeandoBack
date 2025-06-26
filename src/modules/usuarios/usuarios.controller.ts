@@ -41,7 +41,7 @@ export class UsuariosController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un colaborador',
-    bodyType: UpdateColaboradorDto,
+    bodyType: CreateColaboradorDto,
     responseStatus: 200,
     responseDescription: 'Colaborador actualizado correctamente',
   })

@@ -80,6 +80,7 @@ export class IntercambiosController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un intercambio',
+    bodyType: CreateIntercambioDto,
     responseStatus: 200,
     responseDescription: 'Intercambio actualizado correctamente',
   })
