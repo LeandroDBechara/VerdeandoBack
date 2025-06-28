@@ -33,7 +33,14 @@ export class UsuariosService {
         domicilioFiscal: createColaboradorDto.domicilioFiscal,
         cuitCuil: createColaboradorDto.cuitCuil,
         usuarioId: createColaboradorDto.usuarioId,
-      }
+      },
+      select: {
+        id: true,
+        cvu: true,
+        domicilioFiscal: true,
+        cuitCuil: true,
+        usuarioId: true,
+      },
     });
     await this.prisma.usuario.update({
       where: { id: createColaboradorDto.usuarioId },
@@ -41,6 +48,7 @@ export class UsuariosService {
         rol: Role.COLABORADOR,
       }
     });
+    //ver si enviar el colaborador o un mensaje
     return colaborador;
   }
 
@@ -49,6 +57,13 @@ export class UsuariosService {
       const colaborador = await this.prisma.colaborador.update({
         where: { id: colaboradorId },
         data: updateColaboradorDto,
+        select: {
+          id: true,
+          cvu: true,
+          domicilioFiscal: true,
+          cuitCuil: true,
+          usuarioId: true,
+        },
       });
       return colaborador;
     } catch (error) {
@@ -59,7 +74,20 @@ export class UsuariosService {
 
   async findAll() {
     try {
-      const users = await this.prisma.usuario.findMany();
+      const users = await this.prisma.usuario.findMany({
+        where: {
+          isDeleted: false,
+        },
+        include: {
+          colaborador: {select: {
+            id: true,
+            cvu: true,
+            domicilioFiscal: true,
+            cuitCuil: true,
+            usuarioId: true,
+          }},
+        },
+      });
       return users;
     } catch (error) {
       throw new Error(error);
@@ -68,7 +96,7 @@ export class UsuariosService {
 
   async findOne(id: string) {
     try {
-      const user = await this.prisma.usuario.findUnique({ where: { id, isDeleted: false } });
+      const user = await this.prisma.usuario.findUnique({ where: { id, isDeleted: false }, include: { colaborador: true } });
       return user;
     } catch (error) {
       throw new Error(error);

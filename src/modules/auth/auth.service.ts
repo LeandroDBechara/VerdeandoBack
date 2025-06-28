@@ -102,10 +102,29 @@ export class AuthService {
           },
           isDeleted:false,
         },
-        include: {
-          colaborador: true,
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            fechaDeNacimiento: true,
+            rol: true,
+            password: true,
+            fotoPerfil: true,
+            direccion: true,
+            puntos: true,
+            colaborador: {
+              select: {
+                id: true,
+                cvu: true,
+                domicilioFiscal: true,
+                cuitCuil: true,
+                usuarioId: true,
+              },
+            },
+          },
         },
-      });
+      );
       
       if (!findUser) {
         const message = 'Usuario no autorizado';

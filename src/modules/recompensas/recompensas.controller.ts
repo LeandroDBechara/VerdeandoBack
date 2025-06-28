@@ -62,6 +62,17 @@ export class RecompensasController {
   }
 
   @ApiCustomOperation({
+    summary: 'Obtener todos los canjes de un usuario',
+    responseStatus: 200,
+    responseDescription: 'Canjes obtenidos correctamente',
+  })
+  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
+  @Get('canjes/:usuarioId') 
+  findAllCanjesOnUser(@Param('usuarioId') usuarioId: string) {
+    return this.recompensasService.findAllCanjesOnUser(usuarioId);
+  }
+
+  @ApiCustomOperation({
     summary: 'Actualizar una recompensa por id',
     bodyType: CreateRecompensaDto,
     responseStatus: 200,

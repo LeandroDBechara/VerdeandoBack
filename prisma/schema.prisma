@@ -80,7 +80,7 @@ model Comunidad {
   historial   String
   isDeleted   Boolean   @default(false)
 }
-
+//eliminar totalPuntos en la version final
 model Canje {
   id            String   @id @default(uuid())
   fechaDeCanjeo DateTime @default(now())

@@ -68,6 +68,15 @@ export class RecompensasService {
       where: { id },
     });
   }
+  
+  findAllCanjesOnUser(usuarioId: string) {
+    return this.prisma.canje.findMany({
+      where: { usuarioId, isDeleted: false },
+      include: {
+        recompensa: true,
+      },
+    });
+  }
 
   update(id: string, updateRecompensaDto: UpdateRecompensaDto) {
     return this.prisma.recompensa.update({
