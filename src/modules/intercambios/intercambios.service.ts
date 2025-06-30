@@ -66,8 +66,7 @@ export class IntercambiosService {
         where: { id: intercambio.id },
         data: { token }
       });
-      const mensaje: string = "intercambio creado correctamente";
-      return mensaje;
+      return intercambioActualizado;
     } catch (error) {
       throw new Error(error);
     }
