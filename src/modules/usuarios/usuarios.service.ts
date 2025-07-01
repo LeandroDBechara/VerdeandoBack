@@ -114,8 +114,8 @@ export class UsuariosService {
 
   async remove(id: string) {
     try {
-      const user = await this.prisma.usuario.delete({ where: { id } });
-      return user;
+      const user = await this.prisma.usuario.update({ where: { id:id }, data: { isDeleted: true } });
+      return {message: 'Usuario eliminado correctamente'};
     } catch (error) {
       throw new Error(error);
     }

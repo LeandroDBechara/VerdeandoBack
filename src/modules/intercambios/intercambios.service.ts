@@ -19,9 +19,10 @@ export class IntercambiosService {
       const detalles: { residuoId: string; pesoGramos: number; puntosTotal: number }[] = [];
       // Calcular totales primero
       for (const detalle of createIntercambioDto.detalles) {
-        const residuo = await this.prisma.residuo.findUnique({
+        const residuo = await this.prisma.residuo.findFirst({
           where: { id: detalle.residuoId }
         });
+
         if (residuo) {
           pesoTotal += residuo.puntosKg;
           puntosTotal += residuo.puntosKg * detalle.pesoGramos;
@@ -35,9 +36,9 @@ export class IntercambiosService {
       // Validar si el codigo de cupon es valido
       let eventoId: string | null = null;
       if(createIntercambioDto.codigoCupon){
-        const evento = await this.eventosService.validarCodigo(createIntercambioDto.codigoCupon);
-        if(evento){
-          puntosTotal = evento.multiplicador * puntosTotal;
+          const evento = await this.eventosService.validarCodigo(createIntercambioDto.codigoCupon);
+          if(evento){
+            puntosTotal = evento.multiplicador * puntosTotal;
           eventoId = evento.id;
         }
       }
@@ -45,14 +46,19 @@ export class IntercambiosService {
       const intercambio = await this.prisma.intercambio.create({
         data: {
           usuarioId: createIntercambioDto.usuarioId,
-          eventoId: eventoId,
+          eventoId: eventoId ? eventoId : null,
           pesoTotal: pesoTotal,
           totalPuntos: puntosTotal,
+          fecha: new Date(),
           fechaLimite: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
           detalleIntercambio: {
-            create: detalles
+            create: detalles.map(detalle => ({
+              residuoId: detalle.residuoId,
+              pesoGramos: detalle.pesoGramos,
+              puntosTotal: detalle.puntosTotal
+            }))
           }
-        }
+          }
       });
 
       // Generar JWT con duración de una semana
@@ -64,11 +70,17 @@ export class IntercambiosService {
       // Actualizar el intercambio con el token
       const intercambioActualizado = await this.prisma.intercambio.update({
         where: { id: intercambio.id },
-        data: { token }
+        data: { token },include: {
+          usuario: { select: { id: true, nombre: true, apellido: true } },
+          colaborador: { select: { id: true } },
+          puntoVerde: { select: { id: true, nombre: true } },
+          evento: { select: { id: true, titulo: true } },
+          detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
+        }
       });
       return intercambioActualizado;
     } catch (error) {
-      throw new Error(error);
+      throw new Error(error.message);
     }
   }
 
@@ -134,6 +146,13 @@ export class IntercambiosService {
           colaboradorId: colaboradorId,
           puntoVerdeId: puntoVerdeId,
           estado: "REALIZADO"
+          },
+          include: {
+            usuario: { select: { id: true, nombre: true, apellido: true } },
+            colaborador: { select: { id: true } },
+            puntoVerde: { select: { id: true, nombre: true } },
+            evento: { select: { id: true, titulo: true } },
+            detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
           }
       });
 
@@ -146,9 +165,8 @@ export class IntercambiosService {
           await this.prisma.usuario.update({ where: { id: usuario.id }, data: { puntos: usuario.puntos } });
         }
       }
-      const mensaje: string = "intercambio realizado correctamente";
 
-      return mensaje;
+      return intercambioActualizado;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -171,21 +189,34 @@ export class IntercambiosService {
   }
 
   async findAllByUsuarioId(usuarioId: string) {
-    const intercambios = await this.prisma.intercambio.findMany({
-      where: { usuarioId, isDeleted: false }
-    });
-    for(const intercambio of intercambios){
-      if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
-        await this.prisma.intercambio.update({
-          where: { id: intercambio.id },
-          data: { estado: "EXPIRADO" }
-        });
+    try {
+      const intercambios = await this.prisma.intercambio.findMany({
+        where: { usuarioId, isDeleted: false }
+      });
+  
+      for(const intercambio of intercambios){
+        if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
+          await this.prisma.intercambio.update({
+            where: { id: intercambio.id },
+            data: { estado: "EXPIRADO" }
+          });
+        }
       }
+      const intercambiosActualizados = await this.prisma.intercambio.findMany({
+        where: { usuarioId, isDeleted: false },
+        include: {
+          usuario: { select: { id: true, nombre: true, apellido: true } },
+          colaborador: { select: { id: true } },
+          puntoVerde: { select: { id: true, nombre: true } },
+          evento: { select: { id: true, titulo: true } },
+          detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
+        }
+      });
+      return intercambiosActualizados;
+    } catch (error) {
+      throw new Error(error);
     }
-    const intercambiosActualizados = await this.prisma.intercambio.findMany({
-      where: { usuarioId, isDeleted: false }
-    });
-    return intercambiosActualizados;
+    
   }
 
   async findAll() {
@@ -201,7 +232,14 @@ export class IntercambiosService {
       }
     }
     const intercambiosActualizados = await this.prisma.intercambio.findMany({
-      where: { isDeleted: false }
+      where: { isDeleted: false },
+      include: {
+        usuario: { select: { id: true, nombre: true, apellido: true } },
+        colaborador: { select: { id: true } },
+        puntoVerde: { select: { id: true, nombre: true } },
+        evento: { select: { id: true, titulo: true } },
+        detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
+      }
     });
     return intercambiosActualizados;
   }
