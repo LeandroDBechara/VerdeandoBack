@@ -41,8 +41,6 @@ model Usuario {
   direccion         String?
 
   rol                Role     @default(USUARIO)
-  proveedorAuth      String?
-  proveedorId        String?
   fechaAlta          DateTime @default(now())
   fechaActualizacion DateTime @updatedAt
   isDeleted          Boolean  @default(false)
@@ -53,13 +51,27 @@ model Usuario {
   colaborador Colaborador?
   canje       Canje[]
   intercambio Intercambio[]
+  guardado    Guardado[]
+}
+
+model Guardado {
+  id                 String   @id @default(uuid())
+  juegoId            String   @unique
+  nombre             String
+  datosDeGuardado    Bytes
+  fechaAlta          DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  isDeleted          Boolean  @default(false)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
 }
 
 model Colaborador {
-  id        String @id @default(uuid())
-  cvu       String
+  id              String @id @default(uuid())
+  cvu             String
   domicilioFiscal String
-  cuitCuil  String
+  cuitCuil        String
 
   fechaAlta          DateTime @default(now())
   fechaActualizacion DateTime @updatedAt
@@ -80,6 +92,7 @@ model Comunidad {
   historial   String
   isDeleted   Boolean   @default(false)
 }
+
 //eliminar totalPuntos en la version final
 model Canje {
   id            String   @id @default(uuid())
@@ -95,31 +108,31 @@ model Canje {
 }
 
 model Recompensa {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   titulo      String
   descripcion String
   foto        String?
   puntos      Int
   cantidad    Int
-  isDeleted   Boolean  @default(false)
+  isDeleted   Boolean @default(false)
   canjes      Canje[]
 }
 
 model Intercambio {
-  id          String   @id @default(uuid())
-  pesoTotal   Int      @default(0)
-  totalPuntos Int      @default(0)
-  fecha       DateTime @default(now())
-  fechaLimite DateTime?
+  id             String            @id @default(uuid())
+  pesoTotal      Int               @default(0)
+  totalPuntos    Int               @default(0)
+  fecha          DateTime          @default(now())
+  fechaLimite    DateTime?
   fechaRealizado DateTime?
-  estado      EstadoIntercambio   @default(PENDIENTE)
-  isDeleted   Boolean  @default(false)
-  token       String?
+  estado         EstadoIntercambio @default(PENDIENTE)
+  isDeleted      Boolean           @default(false)
+  token          String?
 
   detalleIntercambio DetalleIntercambio[]
 
   usuarioId     String
-  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  usuario       Usuario      @relation(fields: [usuarioId], references: [id])
   puntoVerdeId  String?
   puntoVerde    PuntoVerde?  @relation(fields: [puntoVerdeId], references: [id])
   colaboradorId String?
@@ -130,54 +143,54 @@ model Intercambio {
 }
 
 model Residuo {
-  id       String @id @default(uuid())
-  material String
-  puntosKg Int
-  isDeleted Boolean @default(false)
+  id                 String               @id @default(uuid())
+  material           String
+  puntosKg           Int
+  isDeleted          Boolean              @default(false)
   detalleIntercambio DetalleIntercambio[]
 }
 
 model DetalleIntercambio {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   pesoGramos  Int
   puntosTotal Int
   isDeleted   Boolean @default(false)
-  residuoId String
-  residuo   Residuo @relation(fields: [residuoId], references: [id])
+  residuoId   String
+  residuo     Residuo @relation(fields: [residuoId], references: [id])
 
   intercambioId String?
   intercambio   Intercambio? @relation(fields: [intercambioId], references: [id])
 }
 
 model PuntoVerde {
-  id           String @id @default(uuid())
-  latitud      Float
-  longitud     Float
-  direccion    String
-  nombre       String
-  descripcion  String?
-  imagen       String?
-  diasAtencion String
-  horario      String
-  isDeleted    Boolean  @default(false)
+  id                String   @id @default(uuid())
+  latitud           Float
+  longitud          Float
+  direccion         String
+  nombre            String
+  descripcion       String?
+  imagen            String?
+  diasAtencion      String
+  horario           String
+  isDeleted         Boolean  @default(false)
   residuosAceptados String[]
 
   colaboradorId String
-  colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
-  intercambio Intercambio[]
+  colaborador   Colaborador   @relation(fields: [colaboradorId], references: [id])
+  intercambio   Intercambio[]
 }
 
 model Evento {
-  id            String   @id @default(uuid())
-  titulo        String
-  descripcion   String
-  imagen        String?
-  fechaInicio   DateTime
-  fechaFin      DateTime
-  codigo        String
-  multiplicador Float    @default(1.2)
+  id                     String   @id @default(uuid())
+  titulo                 String
+  descripcion            String
+  imagen                 String?
+  fechaInicio            DateTime
+  fechaFin               DateTime
+  codigo                 String
+  multiplicador          Float    @default(1.2)
   puntosVerdesPermitidos String[]
-  isDeleted     Boolean  @default(false)
+  isDeleted              Boolean  @default(false)
 
   intercambio Intercambio[]
 }

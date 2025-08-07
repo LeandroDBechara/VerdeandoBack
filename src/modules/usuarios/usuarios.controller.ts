@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -95,5 +95,37 @@ export class UsuariosController {
   @Roles(RoleEnum.ADMIN)
   remove(@Param('id') id: string) {
     return this.usuariosService.remove(id);
+  }
+
+  @ApiCustomOperation({
+    summary: 'Guardar un juego',
+    bodyType: {
+      id: { type: 'string' },
+      nombre: { type: 'string' },
+      datosDeGuardado: { type: 'string' },
+      usuarioId: { type: 'string' },
+    },
+    responseStatus: 200,
+    responseDescription: 'Juego guardado correctamente',
+  })
+  @Post('/guardar-juego')
+  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  guardarJuego(@Body() guardarJuegoDto: {id: string, nombre: string, datosDeGuardado: Buffer, usuarioId: string}) {
+    return this.usuariosService.guardarJuego(guardarJuegoDto.id, guardarJuegoDto.nombre, guardarJuegoDto.datosDeGuardado, guardarJuegoDto.usuarioId);
+  }
+
+  @ApiCustomOperation({
+    summary: 'Cargar un juego',
+    bodyType: {
+      id: { type: 'string' },
+      usuarioId: { type: 'string' },
+    },
+    responseStatus: 200,
+    responseDescription: 'Juego cargado correctamente',
+  })
+  @Get('/cargar-juego')
+  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  cargarJuego(@Body() cargarJuegoDto: {id: string, usuarioId: string}) {
+    return this.usuariosService.cargarJuego(cargarJuegoDto.id, cargarJuegoDto.usuarioId);
   }
 }

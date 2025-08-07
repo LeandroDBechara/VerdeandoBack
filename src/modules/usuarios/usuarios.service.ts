@@ -120,4 +120,19 @@ export class UsuariosService {
       throw new Error(error);
     }
   }
+
+  async guardarJuego(id: string, nombre: string, datosDeGuardado: Buffer, usuarioId: string) {
+    const guardado = await this.prisma.guardado.create({
+      data: { juegoId: id, nombre, datosDeGuardado, usuarioId },
+    });
+    return guardado;
+  }
+
+  async cargarJuego(id: string, usuarioId: string) {
+    const guardado = await this.prisma.guardado.findUnique({ where: { juegoId: id, usuarioId } });
+    if (!guardado) {
+      throw new Error('Guardado no encontrado');
+    }
+    return {datosDeGuardado: guardado.datosDeGuardado, fechaActualizacion: guardado.fechaActualizacion};
+  }
 }
