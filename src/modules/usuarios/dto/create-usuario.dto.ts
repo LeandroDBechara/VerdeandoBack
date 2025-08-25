@@ -72,4 +72,21 @@ export class CreateColaboradorDto {
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
-export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {}
+
+export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {
+    @ApiProperty({ description: 'CVU', example: '1234567890123456789012' })
+    @IsString({message: 'El CVU debe ser una cadena de caracteres'})
+    @Matches(/^\d{22}$/, { message: 'El CVU debe contener exactamente 22 dígitos numéricos' })
+    @Length(22, 22, { message: 'El CVU debe tener 22 caracteres' })
+    cvu:string;
+
+    @ApiProperty({ description: 'Domicilio fiscal', example: 'Siempre Viva 123, Tierra del Fuego, Argentina' })
+    @IsString({message: 'El domicilio fiscal debe ser una cadena de caracteres'})
+    domicilioFiscal:string;
+
+    @ApiProperty({ description: 'CUIT/CUIL', example: '20-30123456-7' })   
+    @Transform(({ value }) => value.replace(/-/g, ''))
+    @Matches(/^\d{11}$/, { message: 'El CUIL/CUIT debe tener 11 dígitos numéricos' })
+    @IsString({message: 'El CUIT/CUIL debe ser una cadena de caracteres'})
+    cuitCuil:string;
+}

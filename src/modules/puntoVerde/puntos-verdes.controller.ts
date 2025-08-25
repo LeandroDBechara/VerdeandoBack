@@ -27,7 +27,7 @@ export class PuntosVerdesController {
     return this.puntosVerdesService.create(createPuntosVerdeDto);
   }
   @ApiCustomOperation({
-    summary: 'Verificar existencia de un punto verde por ubicación',
+    summary: 'Validar cercania de un punto verde',
     responseStatus: 200,
     bodyType: ValidarPuntosVerdeDto,
     responseDescription: 'Punto verde obtenido correctamente',
@@ -67,11 +67,11 @@ export class PuntosVerdesController {
     responseDescription: 'Punto verde actualizado correctamente',
   })
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  @Patch(':id')
+  @Patch(':id/:colaboradorId')
   update(
     @Param('id') id: string,
-    @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto,
     @Param('colaboradorId') colaboradorId: string,
+    @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto,
   ) {
     return this.puntosVerdesService.update(id, colaboradorId, updatePuntosVerdeDto);
   }
@@ -82,7 +82,7 @@ export class PuntosVerdesController {
     responseDescription: 'Punto verde eliminado correctamente',
   })
   @Roles(RoleEnum.ADMIN)
-  @Delete(':id')
+  @Delete(':id/:colaboradorId')
   remove(@Param('id') id: string, @Param('colaboradorId') colaboradorId: string) {
     return this.puntosVerdesService.remove(id, colaboradorId);
   }

@@ -54,9 +54,21 @@ export class UsuariosService {
 
   async updateColaborador(colaboradorId:string, updateColaboradorDto: UpdateColaboradorDto) {
     try {
+      const existeColaborador = await this.prisma.colaborador.findUnique({
+        where: { id: colaboradorId },
+      });
+      if (!existeColaborador) {
+        throw new Error('Colaborador no encontrado');
+      }
+      const{cvu, domicilioFiscal, cuitCuil} = updateColaboradorDto;
+
       const colaborador = await this.prisma.colaborador.update({
         where: { id: colaboradorId },
-        data: updateColaboradorDto,
+        data: {
+          cvu: cvu,
+          domicilioFiscal: domicilioFiscal,
+          cuitCuil: cuitCuil,
+        },
         select: {
           id: true,
           cvu: true,

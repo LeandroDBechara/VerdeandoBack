@@ -100,7 +100,7 @@ export class PuntosVerdesService {
         where: {
           id,
           isDeleted: false,
-          colaboradorId: colaborador.id,
+          colaboradorId: colaboradorId,
         },
         data: {
           ...puntosVerdeData,
@@ -113,7 +113,8 @@ export class PuntosVerdesService {
       }
       return puntoVerde;
     } catch (error) {
-      throw new CustomError('Error al actualizar el punto verde', HttpStatus.BAD_REQUEST);
+  
+      throw new CustomError(`Error al actualizar el punto verde ${error}`, HttpStatus.BAD_REQUEST);
     }
   }
 
