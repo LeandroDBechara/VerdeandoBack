@@ -26,17 +26,6 @@ export class PuntosVerdesController {
   create(@Body() createPuntosVerdeDto: CreatePuntosVerdeDto) {
     return this.puntosVerdesService.create(createPuntosVerdeDto);
   }
-  @ApiCustomOperation({
-    summary: 'Validar cercania de un punto verde',
-    responseStatus: 200,
-    bodyType: ValidarPuntosVerdeDto,
-    responseDescription: 'Punto verde obtenido correctamente',
-  })
-  @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  @Post('/verificar')
-  verificarExistenciaPuntoVerde(@Body() location: ValidarPuntosVerdeDto) {
-    return this.puntosVerdesService.verificarExistenciaPuntoVerde(location);
-  }
 
   @ApiCustomOperation({
     summary: 'Obtener todos los puntos verdes',
