@@ -2,7 +2,7 @@ import { PartialType } from "@nestjs/mapped-types";
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
 import { Transform } from "class-transformer";
-import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate } from "class-validator";
+import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl } from "class-validator";
 import { ValidarCuit } from "src/utils/cuitValidation";
 import { transformDateString } from "src/utils/date-transformer";
 
@@ -71,7 +71,16 @@ export class CreateColaboradorDto {
     cuitCuil:string;
 }
 
-export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
+export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
+    @ApiProperty({ description: 'Foto de perfil', example: 'https://example.com/image.jpg' })
+    @IsString({message: 'La foto de perfil debe ser una cadena de caracteres'})
+    @IsUrl({},{ message: 'La foto de perfil debe ser una URL válida' })
+    fotoPerfil:string;
+    @ApiProperty({ description: 'Dirección', example: 'Calle 123' })
+    @IsString({message: 'La dirección debe ser una cadena de caracteres'})
+    @IsNotEmpty({message: 'La dirección es requerida'})
+    direccion:string;
+}
 
 export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {
     @ApiProperty({ description: 'CVU', example: '1234567890123456789012' })
