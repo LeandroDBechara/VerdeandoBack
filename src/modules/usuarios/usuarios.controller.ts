@@ -76,7 +76,7 @@ export class UsuariosController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un usuario por id',
-    bodyType: CreateUsuarioDto,
+    bodyType: UpdateUsuarioDto,
     responseStatus: 200,
     responseDescription: 'Usuario actualizado correctamente',
   })

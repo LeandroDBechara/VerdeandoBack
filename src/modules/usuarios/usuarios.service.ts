@@ -117,7 +117,10 @@ export class UsuariosService {
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto) {
     try {
-      const user = await this.prisma.usuario.update({ where: { id }, data: updateUsuarioDto as any });
+      const user = await this.prisma.usuario.update({
+         where: { id },
+         data: updateUsuarioDto as any
+        });
       return user;
     } catch (error) {
       throw new Error(error);
