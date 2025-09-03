@@ -1,12 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { RecompensasService } from './recompensas.service';
 import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { extname } from 'path';
 
 @ApiTags('Recompensas')
 //@UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,13 +22,49 @@ export class RecompensasController {
 
   @ApiCustomOperation({
     summary: 'Crear una recompensa',
-    bodyType: CreateRecompensaDto,
     responseStatus: 200,
     responseDescription: 'Recompensa creada correctamente',
   })
+  @ApiBody({schema: {
+    type: 'object',
+    properties: {      
+      titulo: { type: 'string', description: 'Titulo de la recompensa' , example: 'Recompensa 1'},
+      descripcion: { type: 'string', description: 'Descripción de la recompensa' , example: 'Recompensa 1'},
+      puntos: { type: 'number', description: 'Puntos de la recompensa' , example: 100},
+      cantidad: { type: 'number', description: 'Cantidad de la recompensa' , example: 100},
+      foto: { type: 'string', format: 'binary' }
+    },
+  }}) 
+  @UseInterceptors(FileInterceptor('foto', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = join(process.cwd(), 'img', 'recompensas');
+        if (!existsSync(uploadPath)) {
+          mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const fileExt = extname(file.originalname);
+        cb(null, `${uniqueSuffix}${fileExt}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+      }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   @Roles(RoleEnum.ADMIN)
   @Post()
-  create(@Body() createRecompensaDto: CreateRecompensaDto) {
+  create(@Body() createRecompensaDto: CreateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
+    if (foto) {
+      createRecompensaDto.foto = `/img/recompensas/${foto.filename}`;
+    }
     return this.recompensasService.create(createRecompensaDto);
   }
 

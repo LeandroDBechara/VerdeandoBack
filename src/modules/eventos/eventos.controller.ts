@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { EventosService } from './eventos.service';
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { existsSync, mkdirSync } from 'fs';
+import { diskStorage } from 'multer';
+import { join } from 'path';
 
 //@UseGuards(JwtAuthGuard, RolesGuard)
 //@ApiBearerAuth('access-token')
@@ -17,13 +21,47 @@ export class EventosController {
 
   @ApiCustomOperation({
     summary: 'Crear un evento',
-    bodyType: CreateEventoDto,
     responseStatus: 200,
     responseDescription: 'Evento creado correctamente',
   })
+  @ApiBody({schema: {
+    type: 'object',
+    properties: {
+      titulo: { type: 'string', description: 'Titulo del evento' , example: 'Evento 1'},
+      descripcion: { type: 'string', description: 'Descripción del evento' , example: 'Evento 1'},
+      imagen: { type: 'string', format: 'binary' },
+      fechaInicio: { type: 'string', description: 'Fecha de inicio del evento' , example: '01-01-2025'},
+      fechaFin: { type: 'string', description: 'Fecha de fin del evento' , example: '01-01-2025'},
+      codigo: { type: 'string', description: 'Código del evento' , example: '123456'},
+      multiplicador: { type: 'number', description: 'Multiplicador del evento' , example: 1.2},
+      puntosVerdesPermitidos: { type: 'array', items: { type: 'string' }, description: 'Puntos verdes permitidos' , example: ['123456']}
+    },
+  }})
+  @UseInterceptors(FileInterceptor('imagen', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = join(process.cwd(), 'img', 'eventos');
+        if (!existsSync(uploadPath)) {
+          mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+      }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   @Roles(RoleEnum.ADMIN)
   @Post()
-  create(@Body() createEventoDto: CreateEventoDto) {
+  create(@Body() createEventoDto: CreateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
+    if (imagen) {
+      createEventoDto.imagen = `/img/eventos/${imagen.filename}`;
+    }
     return this.eventosService.create(createEventoDto);
   }
 
