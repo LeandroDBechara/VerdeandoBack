@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 //@UseGuards(JwtAuthGuard, RolesGuard)
 //@ApiBearerAuth('access-token')
@@ -76,13 +80,84 @@ export class UsuariosController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un usuario por id',
-    bodyType: UpdateUsuarioDto,
     responseStatus: 200,
     responseDescription: 'Usuario actualizado correctamente',
   })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Archivo de imagen para la foto de perfil'
+        },
+        nombre: {
+          type: 'string',
+          description: 'Nombre del usuario',
+          example: 'Juan'
+        },
+        apellido: {
+          type: 'string',
+          description: 'Apellido del usuario',
+          example: 'Pérez'
+        },
+        fechaNacimiento: {
+          type: 'string',
+          format: 'date',
+          description: 'Fecha de nacimiento',
+          example: '2000-01-01'
+        },
+        email: {
+          type: 'string',
+          format: 'email',
+          description: 'Email del usuario',
+          example: 'juan@example.com'
+        },
+        direccion: {
+          type: 'string',
+          description: 'Dirección del usuario',
+          example: 'Calle 123, Ciudad'
+        }
+      }
+    }
+  })
   @Patch(':id')
-  @Roles(RoleEnum.ADMIN)
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = join(process.cwd(), 'img', 'usuarios');
+        if (!existsSync(uploadPath)) {
+          mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const fileExt = extname(file.originalname);
+        cb(null, `${uniqueSuffix}${fileExt}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+      }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
+  
+    update(@Param('id') id: string, @Body() body: any, @UploadedFile() file?: Express.Multer.File) {
+    // Filtrar el campo 'file' del body y crear el DTO
+    const { file: _, ...updateData } = body;
+    const updateUsuarioDto: UpdateUsuarioDto = updateData;
+    
+    if (file) {
+      // Servido como estático en /img
+      updateUsuarioDto.fotoPerfil = `/img/usuarios/${file.filename}` as any;
+    }
     return this.usuariosService.update(id, updateUsuarioDto);
   }
 

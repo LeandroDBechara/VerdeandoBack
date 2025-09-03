@@ -2,7 +2,7 @@ import { PartialType } from "@nestjs/mapped-types";
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
 import { Transform } from "class-transformer";
-import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl } from "class-validator";
+import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl, IsOptional, ValidateIf } from "class-validator";
 import { ValidarCuit } from "src/utils/cuitValidation";
 import { transformDateString } from "src/utils/date-transformer";
 
@@ -72,49 +72,48 @@ export class CreateColaboradorDto {
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
-    @ApiProperty({ description: 'Nombre', example: 'Juan' })
-    @IsString( {message: 'El nombre debe ser una cadena de caracteres'})
-    @IsNotEmpty({message: 'El nombre es requerido'})
+    @ApiProperty({ description: 'Nombre', example: 'Juan', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.nombre && o.nombre.trim() !== '')
+    @IsString({message: 'El nombre debe ser una cadena de caracteres'})
     @Length(2, 40, { message: 'El nombre debe tener entre 2 y 40 caracteres' })
-    nombre:string;
+    nombre?:string;
 
-    @ApiProperty({ description: 'Apellido', example: 'Perez' })
+    @ApiProperty({ description: 'Apellido', example: 'Perez', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.apellido && o.apellido.trim() !== '')
     @IsString({message: 'El apellido debe ser una cadena de caracteres'})
-    @IsNotEmpty({message: 'El apellido es requerido'})
     @Length(2, 40, { message: 'El apellido debe tener entre 2 y 40 caracteres' })
-    apellido:string;
+    apellido?:string;
     
-    @ApiProperty({ description: 'Fecha de nacimiento', example: '01-01-2000' })
-    @Transform(({ value }) => transformDateString(value, 'La fecha de nacimiento'))
+    @ApiProperty({ description: 'Fecha de nacimiento', example: '01-01-2000', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.fechaNacimiento && o.fechaNacimiento !== '')
+    @Transform(({ value }) => {
+      if (!value || value === '') return undefined;
+      return transformDateString(value, 'La fecha de nacimiento');
+    })
     @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
-    @IsNotEmpty({message: 'La fecha de nacimiento es requerida'})
-    fechaNacimiento:Date;
+    fechaNacimiento?:Date;
     
-    @ApiProperty({ description: 'Email', example: 'juan@gmail.com' })
+    @ApiProperty({ description: 'Email', example: 'juan@gmail.com', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.email && o.email.trim() !== '')
     @IsEmail({}, {message: 'El email debe ser una dirección de correo electrónico válida'})
-    @IsNotEmpty({message: 'El email es requerido'})
-    email:string;
-    
-    @ApiProperty({ description: 'Password', example: '123456' })
-    @IsString({message: 'La contraseña debe ser una cadena de caracteres'})
-    @IsNotEmpty({message: 'La contraseña es requerida'})
-    @MinLength(8, {message: 'La contraseña debe tener al menos 8 caracteres'})
-    password:string;
+    email?:string;
 
-    @ApiProperty({ description: 'Rol', example: 'ADMIN' })
-    @IsEnum(Role, {message: 'El rol debe ser un rol válido'})
-    @IsNotEmpty({message: 'El rol es requerido'})
-    rol:Role;
-
-    @ApiProperty({ description: 'Foto de perfil', example: 'https://example.com/image.jpg' })
+    @ApiProperty({ description: 'Foto de perfil', example: 'https://example.com/image.jpg', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.fotoPerfil && o.fotoPerfil.trim() !== '')
     @IsString({message: 'La foto de perfil debe ser una cadena de caracteres'})
     @IsUrl({},{ message: 'La foto de perfil debe ser una URL válida' })
-    fotoPerfil:string;
-    
-    @ApiProperty({ description: 'Dirección', example: 'Calle 123' })
+    fotoPerfil?:string;
+
+    @ApiProperty({ description: 'Dirección', example: 'Calle 123', required: false })
+    @IsOptional()
+    @ValidateIf((o) => o.direccion && o.direccion.trim() !== '')
     @IsString({message: 'La dirección debe ser una cadena de caracteres'})
-    @IsNotEmpty({message: 'La dirección es requerida'})
-    direccion:string;
+    direccion?:string;
 }
 
 export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {

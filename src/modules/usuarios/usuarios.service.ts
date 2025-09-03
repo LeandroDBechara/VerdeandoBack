@@ -117,9 +117,32 @@ export class UsuariosService {
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto) {
     try {
+      // Mapear los campos del DTO a los nombres correctos de Prisma
+      const updateData: any = {};
+      
+      if (updateUsuarioDto.nombre !== undefined && updateUsuarioDto.nombre.trim() !== '') {
+        updateData.nombre = updateUsuarioDto.nombre;
+      }
+      if (updateUsuarioDto.apellido !== undefined && updateUsuarioDto.apellido.trim() !== '') {
+        updateData.apellido = updateUsuarioDto.apellido;
+      }
+      if (updateUsuarioDto.fechaNacimiento !== undefined && updateUsuarioDto.fechaNacimiento !== null && 
+          (typeof updateUsuarioDto.fechaNacimiento === 'string' ? updateUsuarioDto.fechaNacimiento !== '' : true)) {
+        updateData.fechaDeNacimiento = updateUsuarioDto.fechaNacimiento;
+      }
+      if (updateUsuarioDto.email !== undefined && updateUsuarioDto.email.trim() !== '') {
+        updateData.email = updateUsuarioDto.email;
+      }
+      if (updateUsuarioDto.direccion !== undefined && updateUsuarioDto.direccion.trim() !== '') {
+        updateData.direccion = updateUsuarioDto.direccion;
+      }
+      if (updateUsuarioDto.fotoPerfil !== undefined) {
+        updateData.fotoPerfil = updateUsuarioDto.fotoPerfil;
+      }
+
       const user = await this.prisma.usuario.update({
          where: { id },
-         data: updateUsuarioDto as any
+         data: updateData
         });
       return user;
     } catch (error) {

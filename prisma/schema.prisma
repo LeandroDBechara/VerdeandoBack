@@ -161,7 +161,7 @@ model DetalleIntercambio {
   intercambioId String?
   intercambio   Intercambio? @relation(fields: [intercambioId], references: [id])
 }
-
+// cambiar diasAtencion por diasHorarioAtencion, quitar horario
 model PuntoVerde {
   id                String   @id @default(uuid())
   latitud           Float

@@ -30,6 +30,9 @@ async function bootstrap() {
   app.setBaseViewsDir([join(__dirname, '..', 'public')]);
   app.setViewEngine('hbs');
 
+  // Servir archivos estáticos de imágenes desde la carpeta raíz /img
+  app.useStaticAssets(join(process.cwd(), 'img'), { prefix: '/img' });
+
   const configService = app.get(ConfigService);
 
   const PORT = configService.get<number>('PORT')|| 4000;
