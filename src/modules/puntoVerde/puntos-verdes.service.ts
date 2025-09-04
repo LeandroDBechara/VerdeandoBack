@@ -2,6 +2,8 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto, ValidarPuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
+import { existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class PuntosVerdesService {
@@ -28,6 +30,12 @@ export class PuntosVerdesService {
     });
     return puntosVerde;
     } catch (error) {
+      if(createPuntosVerdeDto.imagen){
+        const path = join(process.cwd(), 'img', 'puntos-verdes', createPuntosVerdeDto.imagen.split('/').pop() as string);
+        if(existsSync(path)){
+          unlinkSync(path);
+        }
+      }
       throw new CustomError(`Error al crear el punto verde ${error}`, HttpStatus.BAD_REQUEST);
     }
   }
@@ -41,6 +49,14 @@ export class PuntosVerdesService {
           //revisar que no se muestre el colaborador el id ni los intercambios y eventos
       },
     });
+    puntosVerdes.map((puntoVerde) => {
+      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
+      if(existsSync(path)){
+        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+      }else{
+        return "no existe";
+      }
+    });    
     return puntosVerdes;
     } catch (error) {
       throw new CustomError('Error al obtener los puntos verdes', HttpStatus.BAD_REQUEST);

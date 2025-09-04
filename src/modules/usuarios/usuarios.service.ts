@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
+import { existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
 
 
 @Injectable()
@@ -109,7 +111,18 @@ export class UsuariosService {
   async findOne(id: string) {
     try {
       const user = await this.prisma.usuario.findUnique({ where: { id, isDeleted: false }, include: { colaborador: true } });
-      return user;
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+        const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
+        console.log(path);
+        if(existsSync(path)){
+          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+        }else{
+          return "no existe";
+        }
+      
+      return {user};
     } catch (error) {
       throw new Error(error);
     }
@@ -146,6 +159,12 @@ export class UsuariosService {
         });
       return user;
     } catch (error) {
+      if(updateUsuarioDto.fotoPerfil){
+        const path = join(process.cwd(), 'img', 'usuarios', updateUsuarioDto.fotoPerfil.split('/').pop() as string);
+        if(existsSync(path)){
+          unlinkSync(path);
+        }
+      }
       throw new Error(error);
     }
   }

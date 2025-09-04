@@ -2,15 +2,27 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
+import { existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class RecompensasService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createRecompensaDto: CreateRecompensaDto) {
+    try {
     return this.prisma.recompensa.create({
       data: createRecompensaDto,
     });
+    } catch (error) {
+      if(createRecompensaDto.foto){
+        const path = join(process.cwd(), 'img', 'recompensas', createRecompensaDto.foto.split('/').pop() as string);
+        if(existsSync(path)){
+          unlinkSync(path);
+        }
+      }
+      throw new CustomError('Error al crear la recompensa', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createCanje(createCanjeDto: CreateCanjeDto) {
@@ -57,10 +69,23 @@ export class RecompensasService {
     }
   }
 
-  findAll() {
-    return this.prisma.recompensa.findMany({
+  async findAll() {
+    try {
+    const recompensas = await this.prisma.recompensa.findMany({
       where: { isDeleted: false, cantidad: { gt: 0 } },
     });
+    recompensas.map((recompensa) => {
+      const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
+      if(existsSync(path)){
+        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+      }else{
+        return "no existe";
+      }
+    });
+    return recompensas;
+    } catch (error) {
+      throw new CustomError('Error al obtener las recompensas', HttpStatus.BAD_REQUEST);
+    }
   }
 
   findOne(id: string) {

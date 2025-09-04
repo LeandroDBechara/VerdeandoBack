@@ -1,5 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString, IsUrl, IsUUID, Length, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateRecompensaDto {
   @ApiProperty({ description: 'Titulo', example: 'Recompensa 1' })
@@ -15,21 +16,30 @@ export class CreateRecompensaDto {
   descripcion: string;
 
   @ApiProperty({ description: 'Puntos', example: 100 })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return parseInt(value, 10);
+    }
+    return value;
+  })
   @IsNumber({ allowInfinity: false }, { message: 'Los puntos deben ser un número' })
   @Min(0, { message: 'Los puntos mínimos son 0' })
   @IsNotEmpty({ message: 'Los puntos son requeridos' })
   puntos: number;
   
   @ApiProperty({ description: 'Cantidad', example: 100 })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return parseInt(value, 10);
+    }
+    return value;
+  })
   @IsNumber({ allowInfinity: false }, { message: 'La cantidad debe ser un número' })
   @Min(0, { message: 'La cantidad mínima es 0' })
   @IsNotEmpty({ message: 'La cantidad es requerida' })
   cantidad: number;
 
-  @ApiProperty({ description: 'Foto', example: 'https://www.google.com/foto.jpg' })
-  @IsString({ message: 'La foto debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'La foto es requerida' })
-  @IsUrl({},{ message: 'La foto debe ser una URL válida' })
+  @ApiProperty({ description: 'Foto'})
   foto?: string;
 }
 

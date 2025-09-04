@@ -1,8 +1,15 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, Max, Min, IsUrl, Length, IsUUID, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Max, Min, IsUrl, Length, IsUUID, IsArray, ValidateIf, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreatePuntosVerdeDto {
     @ApiProperty({ description: 'Latitud', example: 10.0 })
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+          return parseFloat(value);
+        }
+        return value;
+      })
     @IsNumber({allowInfinity: false }, { message: 'La latitud debe ser un número' })
     @Min(-90, { message: 'La latitud mínima es -90' })
     @Max(90, { message: 'La latitud máxima es 90' })
@@ -10,6 +17,12 @@ export class CreatePuntosVerdeDto {
     latitud: number;
     
     @ApiProperty({ description: 'Longitud', example: 10.0 })
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+          return parseFloat(value);
+        }
+        return value;
+      })
     @IsNumber({ allowInfinity: false }, { message: 'La longitud debe ser un número' })
     @Min(-180, { message: 'La longitud mínima es -180' })
     @Max(180, { message: 'La longitud máxima es 180' })
@@ -32,9 +45,8 @@ export class CreatePuntosVerdeDto {
     @Length(2, 500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
     descripcion?: string;
 
-    @ApiProperty({ description: 'Imagen', example: 'https://example.com/image.jpg' })
-    @IsString({ message: 'La imagen debe ser una cadena de texto' })
-    @IsUrl({},{ message: 'La imagen debe ser una URL válida' })
+    @ApiProperty({ description: 'Imagen' })
+    @ValidateIf((o) => o.imagen && o.imagen.trim() !== '')
     imagen?: string;
 
     @ApiProperty({ description: 'Días de atención', example: 'Lunes a Viernes' })
@@ -53,9 +65,15 @@ export class CreatePuntosVerdeDto {
     @IsNotEmpty({ message: 'El colaborador es requerido' })
     colaboradorId: string;
     
-    @ApiProperty({ description: 'Materiales aceptados', example: ['Plástico', 'Vidrio'] })
-    @IsString({ each: true, message: 'Los materiales aceptados deben ser cadenas de texto' })
-    @IsArray({ message: 'Los materiales aceptados deben ser un arreglo' })
+    @ApiProperty({ description: 'Residuos aceptados', example: ['Plástico', 'Vidrio'] })
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+          return value.split(',');
+        }
+        return value;
+      })
+    @IsString({ each: true, message: 'Los residuos aceptados deben ser cadenas de texto' })
+    @IsArray({ message: 'Los residuos aceptados deben ser un arreglo' })
     residuosAceptados?: string[];
 }
 export class ValidarPuntosVerdeDto {

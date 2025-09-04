@@ -4,7 +4,7 @@ import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,6 +25,7 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Recompensa creada correctamente',
   })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({schema: {
     type: 'object',
     properties: {      
