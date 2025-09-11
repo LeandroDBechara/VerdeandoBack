@@ -20,8 +20,8 @@ export class CreateEventoDto {
 
   @ApiProperty({ description: 'Imagen del evento'})
   @IsOptional()
-  @ValidateIf((o) => o.imagen && o.imagen.trim() !== '')
-  imagen?: string;
+  @ValidateIf((o) => o.imagen && o.imagen.trim() !== '', { message: 'La imagen es requerida' })
+  imagen?: string ;
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
   @Transform(({ value }) => transformDateString(value, 'La fecha de inicio'))

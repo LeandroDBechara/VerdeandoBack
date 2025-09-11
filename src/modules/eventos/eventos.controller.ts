@@ -94,7 +94,6 @@ export class EventosController {
     return this.eventosService.findOne(id);
   }
 
-
   @ApiCustomOperation({
     summary: 'Actualizar un evento',
     bodyType: CreateEventoDto,
