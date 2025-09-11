@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto, ValidarPuntosVerdeDto } from './dto/create-puntos-verde.dto';
+import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
 import { existsSync, unlinkSync } from 'fs';
@@ -15,10 +15,13 @@ export class PuntosVerdesService {
       const existPV = await this.prisma.puntoVerde.findFirst({
         where: {
         direccion: puntosVerdeData.direccion,
+        isDeleted: false,
+        nombre: puntosVerdeData.nombre,
       },
     });
+
     if (existPV) {
-      throw new CustomError('El punto verde ya existe', HttpStatus.BAD_REQUEST);
+      throw new Error('El punto verde ya existe');
     }
     
     const puntosVerde = await this.prisma.puntoVerde.create({
@@ -36,37 +39,33 @@ export class PuntosVerdesService {
           unlinkSync(path);
         }
       }
-      throw new CustomError(`Error al crear el punto verde ${error}`, HttpStatus.BAD_REQUEST);
+      throw new CustomError(error.message || 'Error al crear el punto verde', error.status || HttpStatus.BAD_REQUEST);
     }
   }
   
-
   async findAll() {
     try {
       const puntosVerdes = await this.prisma.puntoVerde.findMany({
         where: {
           isDeleted: false,
-          //revisar que no se muestre el colaborador el id ni los intercambios y eventos
       },
     });
     puntosVerdes.map((puntoVerde) => {
       const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
       if(existsSync(path)){
         puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-      }else{
-        return "no existe";
       }
     });    
     return puntosVerdes;
     } catch (error) {
-      throw new CustomError('Error al obtener los puntos verdes', HttpStatus.BAD_REQUEST);
+      throw new CustomError(error.message || 'Error al obtener los puntos verdes', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async findOne(id: string) {
     try {
       if (!id) {
-        throw new CustomError('El id es requerido', HttpStatus.BAD_REQUEST);
+        throw new Error('El id es requerido');
       }
       const puntoVerde = await this.prisma.puntoVerde.findUnique({
         where: {
@@ -74,16 +73,23 @@ export class PuntosVerdesService {
           isDeleted: false,
         },
       });
+      if (!puntoVerde) {
+        throw new Error('El punto verde no existe');
+      }
+      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
+      if(existsSync(path)){
+        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+      }
       return puntoVerde;
     } catch (error) {
-      throw new CustomError('Error al obtener el punto verde', HttpStatus.BAD_REQUEST);
+      throw new CustomError(error.message || 'Error al obtener el punto verde', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async update(id: string, colaboradorId: string, updatePuntosVerdeDto: UpdatePuntosVerdeDto) {
     try {
       if (!id || !colaboradorId) {
-        throw new CustomError('El id y el colaboradorId son requeridos', HttpStatus.BAD_REQUEST);
+        throw new Error('El id y el colaboradorId son requeridos');
       }
       const colaborador = await this.prisma.colaborador.findUnique({
         where: {
@@ -92,7 +98,7 @@ export class PuntosVerdesService {
         },
       });
       if (!colaborador) {
-        throw new CustomError('El colaborador no existe', HttpStatus.BAD_REQUEST);
+        throw new Error('El colaborador no existe');
       }
 
       const { descripcion, imagen, ...puntosVerdeData } = updatePuntosVerdeDto;
@@ -109,19 +115,28 @@ export class PuntosVerdesService {
         },
       });
       if (!puntoVerde) {
-        throw new CustomError('El punto verde no existe o no pertenece al colaborador', HttpStatus.BAD_REQUEST);
+        throw new Error('El punto verde no existe o no pertenece al colaborador');
+      }
+      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
+      if(existsSync(path)){
+        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
       }
       return puntoVerde;
     } catch (error) {
-  
-      throw new CustomError(`Error al actualizar el punto verde ${error}`, HttpStatus.BAD_REQUEST);
+      if(updatePuntosVerdeDto.imagen){
+        const path = join(process.cwd(), 'img', 'puntos-verdes', updatePuntosVerdeDto.imagen.split('/').pop() as string);
+        if(existsSync(path)){
+          unlinkSync(path);
+        }
+      }
+      throw new CustomError(error.message || 'Error al actualizar el punto verde', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async remove(id: string, colaboradorId: string) {
     try {
       if (!id || !colaboradorId) {
-        throw new CustomError('El id y el colaboradorId son requeridos', HttpStatus.BAD_REQUEST);
+        throw new Error('El id y el colaboradorId son requeridos');
       }
 
       const puntoVerde = await this.prisma.puntoVerde.update({
@@ -135,11 +150,11 @@ export class PuntosVerdesService {
         },
       });
       if (!puntoVerde) {
-        throw new CustomError('El punto verde no existe o no pertenece al colaborador', HttpStatus.BAD_REQUEST);
+        throw new Error('El punto verde no existe o no pertenece al colaborador');
       }
-      return puntoVerde;
+      return { message: 'Punto verde eliminado correctamente' };
     } catch (error) {
-      throw new CustomError('Error al eliminar el punto verde', HttpStatus.BAD_REQUEST);
+      throw new CustomError(error.message || 'Error al eliminar el punto verde', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 }

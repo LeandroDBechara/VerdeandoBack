@@ -11,6 +11,8 @@ import { PuntosVerdesModule } from '../puntoVerde/puntos-verdes.module';
 import { RecompensasModule } from '../recompensas/recompensas.module';
 import { AuthModule } from '../auth/auth.module';
 import { EventosModule } from '../eventos/eventos.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerModule } from '../scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { EventosModule } from '../eventos/eventos.module';
       envFilePath: ['.env'],
       validationSchema: envValidationSchema
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     UsuariosModule,
@@ -27,6 +30,7 @@ import { EventosModule } from '../eventos/eventos.module';
     PuntosVerdesModule,
     IntercambiosModule,
     EventosModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

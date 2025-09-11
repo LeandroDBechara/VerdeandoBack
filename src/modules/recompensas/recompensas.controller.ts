@@ -37,6 +37,14 @@ export class RecompensasController {
     },
   }}) 
   @UseInterceptors(FileInterceptor('foto', {
+    fileFilter: (req, file, cb) => {
+      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+      }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 },
     storage: diskStorage({
       destination: (req, file, cb) => {
         const uploadPath = join(process.cwd(), 'img', 'recompensas');
@@ -51,14 +59,6 @@ export class RecompensasController {
         cb(null, `${uniqueSuffix}${fileExt}`);
       },
     }),
-    fileFilter: (req, file, cb) => {
-      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
-      }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },
   }))
   @Roles(RoleEnum.ADMIN)
   @Post()

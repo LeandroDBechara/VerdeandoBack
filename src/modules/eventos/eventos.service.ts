@@ -10,7 +10,15 @@ export class EventosService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createEventoDto: CreateEventoDto) {
     try {
-      //titulo, descripcion, fechaInicio, fechaFin, imagen, codigo, multiplicador, puntosVerdesPermitidos
+      
+      if (createEventoDto.codigo) {
+        const evento = await this.prisma.evento.findFirst({
+          where: { codigo: createEventoDto.codigo, isDeleted: false },
+        });
+        if (evento) {
+          throw new Error('El código de evento ya existe');
+        }
+      }
       if (createEventoDto.fechaFin < createEventoDto.fechaInicio) {
         throw new Error('La fecha de fin debe ser mayor a la fecha de inicio');
       }
@@ -76,7 +84,10 @@ export class EventosService {
         throw new Error('El código debe tener entre 2 y 8 caracteres');
       }
       const evento = await this.prisma.evento.findFirst({
-        where: { codigo },
+        where: { 
+          codigo,
+          isDeleted: false,
+        },
       });
       if (!evento) {
         throw new Error('Código de evento no encontrado');
@@ -212,6 +223,21 @@ export class EventosService {
       return { message: 'Evento eliminado correctamente' };
     } catch (error) {
       throw new CustomError(error.message || 'Error al eliminar el evento', error.status || HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async comprobacionVencimientoEventos() {
+    try {
+      await this.prisma.evento.updateMany({
+        where: {
+          fechaFin: { lt: new Date() },
+          isDeleted: false,
+        },
+        data: { isDeleted: true },
+      });
+      return { message: 'Eventos vencidos actualizados correctamente' };
+    } catch (error) {
+      throw new CustomError(error.message || 'Error al actualizar el isDeleted del evento', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 }
