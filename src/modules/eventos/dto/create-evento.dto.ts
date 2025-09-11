@@ -1,17 +1,21 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, ValidateIf } from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, Max, MaxLength, Min, MinLength, ValidateIf } from 'class-validator';
 import { transformDateString } from 'src/utils/date-transformer';
 
 export class CreateEventoDto {
   @ApiProperty({ description: 'Título del evento', example: 'Evento de prueba' })
-  @IsString({ message: 'El título debe ser una cadena de texto' })
   @IsNotEmpty({ message: 'El título es requerido' })
+  @IsString({ message: 'El título debe ser una cadena de texto' })
+  @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
+  @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
-  @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @IsNotEmpty({ message: 'La descripción es requerida' })
+  @IsString({ message: 'La descripción debe ser una cadena de texto' })
+  @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
+  @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -23,20 +27,23 @@ export class CreateEventoDto {
   @Transform(({ value }) => transformDateString(value, 'La fecha de inicio'))
   @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida' })
+  @Min(new Date().getTime(), { message: 'La fecha de inicio debe ser mayor o igual a la fecha actual' })
   fechaInicio: Date;
 
 
   @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
+  @IsNotEmpty({ message: 'La fecha de fin es requerida' })
   @Transform(({ value }) => transformDateString(value, 'La fecha de fin'))
   @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
-  @IsNotEmpty({ message: 'La fecha de fin es requerida' })
+  @Min(new Date().getTime(), { message: 'La fecha de fin debe ser mayor o igual a la fecha actual' })
   fechaFin: Date;
 
 
   @ApiProperty({ description: 'Código del evento', example: '123456' })
+  @IsOptional({ message: 'El código es requerido' })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El código es requerido' })
-  codigo: string;
+  @MaxLength(8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
   @Transform(({ value }) => {
@@ -45,11 +52,12 @@ export class CreateEventoDto {
     }
     return value;
   })
+  @IsOptional({ message: 'El multiplicador es requerido' })
   @IsNumber({}, { message: 'El multiplicador debe ser un número' })
-  @IsNotEmpty({ message: 'El multiplicador es requerido' })
-  multiplicador: number;
+  @Min(1.0, { message: 'El multiplicador debe ser mayor a 1.0' })
+  multiplicador?: number;
 
-  @ApiProperty({ description: 'Punto verde', example: ['123456'] })
+  @ApiProperty({ description: 'Punto verde', example: ['123e4567-e89b-12d3-a456-426614174000'] })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
       return value.split(',');

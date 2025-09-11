@@ -157,6 +157,12 @@ export class UsuariosService {
          where: { id },
          data: updateData
         });
+        
+        const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
+        console.log(path);
+        if(existsSync(path)){
+          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+        }
       return user;
     } catch (error) {
       if(updateUsuarioDto.fotoPerfil){

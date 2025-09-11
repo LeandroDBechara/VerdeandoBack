@@ -35,12 +35,11 @@ export class PuntosVerdesController {
         direccion: { type: 'string', description: 'Dirección del punto verde' , example: 'Calle 123, Ciudad'},
         latitud: { type: 'number', description: 'Latitud del punto verde' , example: 10.0},
         longitud: { type: 'number', description: 'Longitud del punto verde' , example: 10.0},
-        diasAtencion: { type: 'string', description: 'Días de atención del punto verde' , example: 'Lunes a Viernes'},
-        horario: { type: 'string', description: 'Horario de atención del punto verde' , example: '09:00 - 18:00'},
+        diasHorarioAtencion: { type: 'string', description: 'Días de atención del punto verde' , example: 'Lunes a Viernes'},
         colaboradorId: { type: 'string', description: 'ID del colaborador' , example: '123e4567-e89b-12d3-a456-426614174000'},
         residuosAceptados: { type: 'array', items: { type: 'string' }, description: 'Materiales aceptados del punto verde' , example: ['Plástico', 'Vidrio']}
       },
-      required: ['imagen','nombre','direccion','latitud','longitud','diasAtencion','colaboradorId','residuosAceptados']
+      required: ['imagen','nombre','direccion','latitud','longitud','diasHorarioAtencion','colaboradorId','residuosAceptados']
     }
   })
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)

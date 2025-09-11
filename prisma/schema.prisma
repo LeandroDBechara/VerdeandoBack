@@ -93,11 +93,9 @@ model Comunidad {
   isDeleted   Boolean   @default(false)
 }
 
-//eliminar totalPuntos en la version final
 model Canje {
   id            String   @id @default(uuid())
   fechaDeCanjeo DateTime @default(now())
-  totalPuntos   Int      @default(0)
   isDeleted     Boolean  @default(false)
 
   usuarioId String
@@ -161,7 +159,7 @@ model DetalleIntercambio {
   intercambioId String?
   intercambio   Intercambio? @relation(fields: [intercambioId], references: [id])
 }
-// cambiar diasAtencion por diasHorarioAtencion, quitar horario
+
 model PuntoVerde {
   id                String   @id @default(uuid())
   latitud           Float
@@ -170,8 +168,7 @@ model PuntoVerde {
   nombre            String
   descripcion       String?
   imagen            String?
-  diasAtencion      String
-  horario           String
+  diasHorarioAtencion String
   isDeleted         Boolean  @default(false)
   residuosAceptados String[]
 
@@ -187,8 +184,8 @@ model Evento {
   imagen                 String?
   fechaInicio            DateTime
   fechaFin               DateTime
-  codigo                 String
-  multiplicador          Float    @default(1.2)
+  codigo                 String?
+  multiplicador          Float    @default(1.0)
   puntosVerdesPermitidos String[]
   isDeleted              Boolean  @default(false)
 

@@ -49,15 +49,10 @@ export class CreatePuntosVerdeDto {
     @ValidateIf((o) => o.imagen && o.imagen.trim() !== '')
     imagen?: string;
 
-    @ApiProperty({ description: 'Días de atención', example: 'Lunes a Viernes' })
+    @ApiProperty({ description: 'Días de atención', example: 'Lunes a Viernes 09:00 - 18:00 \n Sabado 09:00 - 13:00' })
     @IsString({ message: 'Los días de atención deben ser una cadena de texto' })
     @IsNotEmpty({ message: 'Los días de atención son requeridos' })
-    diasAtencion: string;
-
-    @ApiProperty({ description: 'Horario', example: '09:00 - 18:00' })
-    @IsString({ message: 'El horario debe ser una cadena de texto' })
-    @IsNotEmpty({ message: 'El horario es requerido' })
-    horario: string;
+    diasHorarioAtencion: string;
 
     @ApiProperty({ description: 'Colaborador id', example: '123e4567-e89b-12d3-a456-426614174000' })
     @IsUUID(4, { message: 'El colaborador debe ser un UUID válido' })

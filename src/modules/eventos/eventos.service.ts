@@ -1,38 +1,52 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/utils/custom.error';
-import { existsSync } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import { unlinkSync } from 'fs';
 
 @Injectable()
 export class EventosService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createEventoDto: CreateEventoDto) {
     try {
-
+     //titulo, descripcion, fechaInicio, fechaFin, imagen, codigo, multiplicador, puntosVerdesPermitidos
     if(createEventoDto.fechaFin < createEventoDto.fechaInicio){
       throw new Error('La fecha de fin debe ser mayor a la fecha de inicio');
     }
+
     if(createEventoDto.fechaInicio < new Date() || createEventoDto.fechaFin < new Date()){
       throw new Error('La fecha de inicio y fin deben ser mayor a la fecha actual');
     }
-
+    
     if (createEventoDto.puntosVerdesPermitidos && createEventoDto.puntosVerdesPermitidos.length > 0 && createEventoDto.puntosVerdesPermitidos[0] !== '') {
       const puntosVerdesPermitidos = await this.prisma.puntoVerde.findMany({
-        where: { id: { in: createEventoDto.puntosVerdesPermitidos } },
+        where: { id: { in: createEventoDto.puntosVerdesPermitidos }, isDeleted: false },
         select: { id: true },
       });
       
-      if (puntosVerdesPermitidos.length !== createEventoDto.puntosVerdesPermitidos.length) {
-        throw new Error('Punto verde no encontrado');
+      if (puntosVerdesPermitidos.length === 0) {
+        throw new Error('Puntos verdes no encontrados');
       }
       createEventoDto.puntosVerdesPermitidos = puntosVerdesPermitidos.map((puntoVerde) => puntoVerde.id);
     }
    
     return this.prisma.evento.create({
-      data: createEventoDto,
+      data: {
+        ...createEventoDto,
+        codigo : createEventoDto.codigo ? createEventoDto.codigo : null,
+        multiplicador : createEventoDto.multiplicador ? createEventoDto.multiplicador : 1.0,
+      },
+      select: {
+        id: true,
+        titulo: true,
+        descripcion: true,
+        imagen: true,
+        fechaInicio: true,
+        fechaFin: true,
+        codigo: true,
+        puntosVerdesPermitidos: true,
+      },
     });
     } catch (error) {
       if(createEventoDto.imagen){
@@ -41,7 +55,8 @@ export class EventosService {
           unlinkSync(path);
         }
       }
-      throw new CustomError('Error al crear el evento', HttpStatus.BAD_REQUEST);
+      console.log(error);
+      throw new CustomError(error.message || 'Error al crear el evento',error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
