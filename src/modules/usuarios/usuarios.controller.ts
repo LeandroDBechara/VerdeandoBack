@@ -3,6 +3,8 @@ import { UsuariosService } from './usuarios.service';
 import {
   CreateColaboradorDto,
   CreateUsuarioDto,
+  CargarJuegoDto,
+  GuardarJuegoDto,
   UpdateColaboradorDto,
   UpdateUsuarioDto,
 } from './dto/create-usuario.dto';
@@ -16,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { Juego } from '@prisma/client';
 
 //@UseGuards(JwtAuthGuard, RolesGuard)
 //@ApiBearerAuth('access-token')
@@ -179,38 +182,25 @@ export class UsuariosController {
 
   @ApiCustomOperation({
     summary: 'Guardar un juego',
-    bodyType: {
-      id: { type: 'string' },
-      nombre: { type: 'string' },
-      datosDeGuardado: { type: 'string' },
-      usuarioId: { type: 'string' },
-    },
+    bodyType: GuardarJuegoDto,
     responseStatus: 200,
     responseDescription: 'Juego guardado correctamente',
   })
   @Post('/guardar-juego')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  guardarJuego(@Body() guardarJuegoDto: { id: string; nombre: string; datosDeGuardado: Buffer; usuarioId: string }) {
-    return this.usuariosService.guardarJuego(
-      guardarJuegoDto.id,
-      guardarJuegoDto.nombre,
-      guardarJuegoDto.datosDeGuardado,
-      guardarJuegoDto.usuarioId,
-    );
+  guardarJuego(@Body() guardarJuegoDto: GuardarJuegoDto) {
+    return this.usuariosService.guardarJuego(guardarJuegoDto);
   }
 
   @ApiCustomOperation({
     summary: 'Cargar un juego',
-    bodyType: {
-      id: { type: 'string' },
-      usuarioId: { type: 'string' },
-    },
+    bodyType: CargarJuegoDto,
     responseStatus: 200,
     responseDescription: 'Juego cargado correctamente',
   })
   @Get('/cargar-juego')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  cargarJuego(@Body() cargarJuegoDto: { id: string; usuarioId: string }) {
-    return this.usuariosService.cargarJuego(cargarJuegoDto.id, cargarJuegoDto.usuarioId);
+  cargarJuego(@Body() cargarJuegoDto: CargarJuegoDto) {
+    return this.usuariosService.cargarJuego(cargarJuegoDto);
   }
 }

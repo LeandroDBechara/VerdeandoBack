@@ -1,8 +1,8 @@
 import { PartialType } from "@nestjs/mapped-types";
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "@prisma/client";
+import { Juego, Role } from "@prisma/client";
 import { Transform } from "class-transformer";
-import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl, IsOptional, ValidateIf } from "class-validator";
+import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl, IsOptional, ValidateIf, IsBase64} from "class-validator";
 import { ValidarCuit } from "src/utils/cuitValidation";
 import { transformDateString } from "src/utils/date-transformer";
 
@@ -135,4 +135,38 @@ export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {
     @Matches(/^\d{11}$/, { message: 'El CUIL/CUIT debe tener 11 dígitos numéricos' })
     @IsString({message: 'El CUIT/CUIL debe ser una cadena de caracteres'})
     cuitCuil:string;
+}
+
+export class GuardarJuegoDto {
+    @ApiProperty({ description: 'Juego', example: 'CLICKER' })
+    @IsNotEmpty({message: 'El juego es requerido'})
+    @IsEnum(Juego, {message: 'El juego debe ser un juego válido'})
+    juego:Juego;
+
+    @ApiProperty({ description: 'Nombre', example: 'Clicker' })
+    @IsNotEmpty({message: 'El nombre es requerido'})
+    @IsString({message: 'El nombre debe ser una cadena de caracteres'})
+    nombre:string;
+
+    @ApiProperty({ description: 'Datos de guardado', example: 'datosDeGuardado' })
+    @IsNotEmpty({message: 'Los datos de guardado son requeridos'})
+    @IsBase64({},{message: 'Los datos de guardado deben ser una cadena de caracteres base64'})
+    datosDeGuardado:Buffer;
+
+    @ApiProperty({ description: 'Usuario', example: '1' })
+    @IsNotEmpty({message: 'El usuario es requerido'})
+    @IsString({message: 'El usuario debe ser una cadena de caracteres'})
+    usuarioId:string;
+}
+
+export class CargarJuegoDto {
+    @ApiProperty({ description: 'Juego', example: 'CLICKER' })
+    @IsNotEmpty({message: 'El juego es requerido'})
+    @IsEnum(Juego, {message: 'El juego debe ser un juego válido'})
+    juego:Juego;
+
+    @ApiProperty({ description: 'Usuario', example: '1' })
+    @IsNotEmpty({message: 'El usuario es requerido'})
+    @IsString({message: 'El usuario debe ser una cadena de caracteres'})
+    usuarioId:string;
 }

@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import {CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto} from './dto/create-usuario.dto';
+import {CargarJuegoDto, CreateColaboradorDto, CreateUsuarioDto, GuardarJuegoDto, UpdateColaboradorDto, UpdateUsuarioDto} from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { existsSync, unlinkSync } from 'fs';
@@ -210,13 +210,14 @@ export class UsuariosService {
     }
   }
 
-  async guardarJuego(id: string, nombre: string, datosDeGuardado: Buffer, usuarioId: string) {
+  async guardarJuego(guardarJuegoDto: GuardarJuegoDto) {
     try {
-      if (!id || !nombre || !datosDeGuardado || !usuarioId) {
-        throw new Error('El id, nombre, datosDeGuardado y usuarioId son requeridos');
+      const { juego, nombre, datosDeGuardado, usuarioId } = guardarJuegoDto;
+      if (!juego || !nombre || !datosDeGuardado || !usuarioId) {
+        throw new Error('El juego, nombre, datosDeGuardado y usuarioId son requeridos');
       }
       const guardado = await this.prisma.guardado.create({
-        data: { juegoId: id, nombre, datosDeGuardado, usuarioId },
+        data: { juego, nombre, datosDeGuardado, usuarioId },
       });
       return guardado;
     } catch (error) {
@@ -224,12 +225,13 @@ export class UsuariosService {
     }
   }
 
-  async cargarJuego(id: string, usuarioId: string) {
-    try {
-      if (!id || !usuarioId) {
+  async cargarJuego(cargarJuegoDto: CargarJuegoDto) {
+    try { 
+      const { juego, usuarioId } = cargarJuegoDto;
+      if (!juego || !usuarioId) {
         throw new Error('El id y el usuarioId son requeridos');
       }
-      const guardado = await this.prisma.guardado.findUnique({ where: { juegoId: id, usuarioId } });
+      const guardado = await this.prisma.guardado.findFirst({ where: { juego, usuarioId } });
       if (!guardado) {
         throw new Error('Guardado no encontrado');
       }
