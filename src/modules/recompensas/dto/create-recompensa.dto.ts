@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsUUID, Length, Min, ValidateIf } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Min, ValidateIf } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateRecompensaDto {
@@ -26,7 +26,7 @@ export class CreateRecompensaDto {
   @IsNumber({ allowInfinity: false }, { message: 'Los puntos deben ser un número' })
   @Min(0, { message: 'Los puntos mínimos son 0' })
   puntos: number;
-  
+
   @ApiProperty({ description: 'Cantidad', example: 100 })
   @IsNotEmpty({ message: 'La cantidad es requerida' })
   @Transform(({ value }) => {
@@ -39,7 +39,7 @@ export class CreateRecompensaDto {
   @Min(0, { message: 'La cantidad mínima es 0' })
   cantidad: number;
 
-  @ApiProperty({ description: 'Foto'})
+  @ApiProperty({ description: 'Foto' })
   @IsOptional({ message: 'La foto es requerida' })
   @ValidateIf((o) => o.foto && o.foto.trim() !== '', { message: 'La imagen es requerida' })
   foto?: string;
@@ -51,7 +51,7 @@ export class CreateCanjeDto {
   @IsString({ message: 'La recompensa es requerida' })
   @IsUUID(4, { message: 'La recompensa debe ser un UUID válido' })
   recompensaId: string;
-  
+
   @ApiProperty({ description: 'Usuario id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsNotEmpty({ message: 'El usuario es requerido' })
   @IsString({ message: 'El usuario es requerido' })

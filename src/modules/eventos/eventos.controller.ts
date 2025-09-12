@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors} from '@nestjs/common';
 import { EventosService } from './eventos.service';
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -25,44 +25,53 @@ export class EventosController {
     responseDescription: 'Evento creado correctamente',
   })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({schema: {
-    type: 'object',
-    properties: {
-      titulo: { type: 'string', description: 'Titulo del evento' , example: 'Evento 1'},
-      descripcion: { type: 'string', description: 'Descripción del evento' , example: 'Evento 1'},
-      imagen: { type: 'string', format: 'binary' },
-      fechaInicio: { type: 'string', description: 'Fecha de inicio del evento' , example: '01-01-2025'},
-      fechaFin: { type: 'string', description: 'Fecha de fin del evento' , example: '01-01-2025'},
-      codigo: { type: 'string', description: 'Código del evento' , example: '123456'},
-      multiplicador: { type: 'number', description: 'Multiplicador del evento' , example: 1.0},
-      puntosVerdesPermitidos: { type: 'array', items: { type: 'string' }, description: 'Puntos verdes permitidos' , example: ['123456']}
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        titulo: { type: 'string', description: 'Titulo del evento', example: 'Evento 1' },
+        descripcion: { type: 'string', description: 'Descripción del evento', example: 'Evento 1' },
+        imagen: { type: 'string', format: 'binary' },
+        fechaInicio: { type: 'string', description: 'Fecha de inicio del evento', example: '01-01-2025' },
+        fechaFin: { type: 'string', description: 'Fecha de fin del evento', example: '01-01-2025' },
+        codigo: { type: 'string', description: 'Código del evento', example: '123456' },
+        multiplicador: { type: 'number', description: 'Multiplicador del evento', example: 1.0 },
+        puntosVerdesPermitidos: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Puntos verdes permitidos',
+          example: ['123456'],
+        },
+      },
+      required: ['titulo', 'descripcion', 'fechaInicio', 'fechaFin', 'codigo', 'multiplicador'],
     },
-    required: ['titulo', 'descripcion', 'fechaInicio', 'fechaFin', 'codigo', 'multiplicador']
-  }})
-  @UseInterceptors(FileInterceptor('imagen', {
-    fileFilter: (req, file, cb) => {
-      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
-      }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = join(process.cwd(), 'img', 'eventos');
-        if (!existsSync(uploadPath)) {
-          mkdirSync(uploadPath, { recursive: true });
+  })
+  @UseInterceptors(
+    FileInterceptor('imagen', {
+      fileFilter: (req, file, cb) => {
+        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
         }
-        cb(null, uploadPath);
       },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const fileExt = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${fileExt}`);
-      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'img', 'eventos');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExt = extname(file.originalname);
+          cb(null, `${uniqueSuffix}${fileExt}`);
+        },
+      }),
     }),
-  }))
+  )
   @Roles(RoleEnum.ADMIN)
   @Post()
   create(@Body() createEventoDto: CreateEventoDto, @UploadedFile() imagen: Express.Multer.File) {

@@ -1,10 +1,11 @@
-import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator";
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, Length } from 'class-validator';
 
 export class CreateResiduoDto {
   @ApiProperty({ description: 'Material', example: 'Plástico' })
   @IsNotEmpty({ message: 'El material es requerido' })
   @IsString({ message: 'El material debe ser una cadena de texto' })
+  @Length(2, 100, { message: 'El material debe tener entre 2 y 100 caracteres' })
   material: string;
 
   @ApiProperty({ description: 'Puntos por kg', example: 100 })

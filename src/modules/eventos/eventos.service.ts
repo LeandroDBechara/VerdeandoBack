@@ -10,7 +10,6 @@ export class EventosService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createEventoDto: CreateEventoDto) {
     try {
-      
       if (createEventoDto.codigo) {
         const evento = await this.prisma.evento.findFirst({
           where: { codigo: createEventoDto.codigo, isDeleted: false },
@@ -84,7 +83,7 @@ export class EventosService {
         throw new Error('El código debe tener entre 2 y 8 caracteres');
       }
       const evento = await this.prisma.evento.findFirst({
-        where: { 
+        where: {
           codigo,
           isDeleted: false,
         },
@@ -237,7 +236,10 @@ export class EventosService {
       });
       return { message: 'Eventos vencidos actualizados correctamente' };
     } catch (error) {
-      throw new CustomError(error.message || 'Error al actualizar el isDeleted del evento', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al actualizar el isDeleted del evento',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

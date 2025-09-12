@@ -26,6 +26,11 @@ enum EstadoIntercambio {
   EXPIRADO
 }
 
+enum Juego {
+  CLICKER
+  IDLE
+}
+
 //Falta: comunidad(consultar con grupo);
 //caminos no felices
 
@@ -56,7 +61,7 @@ model Usuario {
 
 model Guardado {
   id                 String   @id @default(uuid())
-  juegoId            String   @unique
+  juego              Juego
   nombre             String
   datosDeGuardado    Bytes
   fechaAlta          DateTime @default(now())
@@ -142,7 +147,7 @@ model Intercambio {
 
 model Residuo {
   id                 String               @id @default(uuid())
-  material           String
+  material           String               @unique
   puntosKg           Int
   isDeleted          Boolean              @default(false)
   detalleIntercambio DetalleIntercambio[]
@@ -161,16 +166,16 @@ model DetalleIntercambio {
 }
 
 model PuntoVerde {
-  id                String   @id @default(uuid())
-  latitud           Float
-  longitud          Float
-  direccion         String
-  nombre            String
-  descripcion       String?
-  imagen            String?
+  id                  String   @id @default(uuid())
+  latitud             Float
+  longitud            Float
+  direccion           String
+  nombre              String
+  descripcion         String?
+  imagen              String?
   diasHorarioAtencion String
-  isDeleted         Boolean  @default(false)
-  residuosAceptados String[]
+  isDeleted           Boolean  @default(false)
+  residuosAceptados   String[]
 
   colaboradorId String
   colaborador   Colaborador   @relation(fields: [colaboradorId], references: [id])

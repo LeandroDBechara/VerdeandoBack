@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import {CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto} from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
-
+import CustomError from 'src/utils/custom.error';
 
 @Injectable()
 export class UsuariosService {
@@ -24,37 +24,41 @@ export class UsuariosService {
       });
       return user;
     } catch (error) {
-      console.error('Error al crear usuario:', error);
-      throw error;}
+      throw new CustomError(error.message || 'Error al crear el usuario', error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
   async serColaborador(createColaboradorDto: CreateColaboradorDto) {
-    const colaborador = await this.prisma.colaborador.create({
-      data: {
-        cvu: createColaboradorDto.cvu,
-        domicilioFiscal: createColaboradorDto.domicilioFiscal,
-        cuitCuil: createColaboradorDto.cuitCuil,
-        usuarioId: createColaboradorDto.usuarioId,
-      },
-      select: {
-        id: true,
-        cvu: true,
-        domicilioFiscal: true,
-        cuitCuil: true,
-        usuarioId: true,
-      },
-    });
-    await this.prisma.usuario.update({
-      where: { id: createColaboradorDto.usuarioId },
-      data: {
-        rol: Role.COLABORADOR,
-      }
-    });
-    //ver si enviar el colaborador o un mensaje
-    return colaborador;
+    try {
+      const colaborador = await this.prisma.colaborador.create({
+        data: {
+          cvu: createColaboradorDto.cvu,
+          domicilioFiscal: createColaboradorDto.domicilioFiscal,
+          cuitCuil: createColaboradorDto.cuitCuil,
+          usuarioId: createColaboradorDto.usuarioId,
+        },
+        select: {
+          id: true,
+          cvu: true,
+          domicilioFiscal: true,
+          cuitCuil: true,
+          usuarioId: true,
+        },
+      });
+      await this.prisma.usuario.update({
+        where: { id: createColaboradorDto.usuarioId },
+        data: {
+          rol: Role.COLABORADOR,
+        },
+      });
+      //ver si enviar el colaborador o un mensaje
+      return colaborador;
+    } catch (error) {
+      throw new CustomError(error.message || 'Error al crear el colaborador', error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
-  async updateColaborador(colaboradorId:string, updateColaboradorDto: UpdateColaboradorDto) {
+  async updateColaborador(colaboradorId: string, updateColaboradorDto: UpdateColaboradorDto) {
     try {
       const existeColaborador = await this.prisma.colaborador.findUnique({
         where: { id: colaboradorId },
@@ -62,7 +66,8 @@ export class UsuariosService {
       if (!existeColaborador) {
         throw new Error('Colaborador no encontrado');
       }
-      const{cvu, domicilioFiscal, cuitCuil} = updateColaboradorDto;
+
+      const { cvu, domicilioFiscal, cuitCuil } = updateColaboradorDto;
 
       const colaborador = await this.prisma.colaborador.update({
         where: { id: colaboradorId },
@@ -81,10 +86,12 @@ export class UsuariosService {
       });
       return colaborador;
     } catch (error) {
-      throw  Error(error);
+      throw new CustomError(
+        error.message || 'Error al actualizar el colaborador',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
-
 
   async findAll() {
     try {
@@ -93,54 +100,70 @@ export class UsuariosService {
           isDeleted: false,
         },
         include: {
-          colaborador: {select: {
-            id: true,
-            cvu: true,
-            domicilioFiscal: true,
-            cuitCuil: true,
-            usuarioId: true,
-          }},
+          colaborador: {
+            select: {
+              id: true,
+              cvu: true,
+              domicilioFiscal: true,
+              cuitCuil: true,
+              usuarioId: true,
+            },
+          },
         },
       });
+
+      users.map((user) => {
+        const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
+        if (existsSync(path)) {
+          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+        }
+      });
+
       return users;
     } catch (error) {
-      throw new Error(error);
+      throw new CustomError(error.message || 'Error al obtener los usuarios', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async findOne(id: string) {
     try {
-      const user = await this.prisma.usuario.findUnique({ where: { id, isDeleted: false }, include: { colaborador: true } });
+      const user = await this.prisma.usuario.findUnique({
+        where: { id, isDeleted: false },
+        include: { colaborador: true },
+      });
       if (!user) {
         throw new Error('Usuario no encontrado');
       }
-        const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
-        console.log(path);
-        if(existsSync(path)){
-          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-        }else{
-          return "no existe";
-        }
-      
-      return {user};
+      const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
+      console.log(path);
+      if (existsSync(path)) {
+        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+      }
+      return { user };
     } catch (error) {
-      throw new Error(error);
+      throw new CustomError(error.message || 'Error al obtener el usuario', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto) {
     try {
+      if (!id) {
+        throw new Error('El id es requerido');
+      }
       // Mapear los campos del DTO a los nombres correctos de Prisma
       const updateData: any = {};
-      
+
       if (updateUsuarioDto.nombre !== undefined && updateUsuarioDto.nombre.trim() !== '') {
         updateData.nombre = updateUsuarioDto.nombre;
       }
       if (updateUsuarioDto.apellido !== undefined && updateUsuarioDto.apellido.trim() !== '') {
         updateData.apellido = updateUsuarioDto.apellido;
       }
-      if (updateUsuarioDto.fechaNacimiento !== undefined && updateUsuarioDto.fechaNacimiento !== null && 
-          (typeof updateUsuarioDto.fechaNacimiento === 'string' ? updateUsuarioDto.fechaNacimiento !== '' : true)) {
+      if (
+        updateUsuarioDto.fechaNacimiento !== undefined &&
+        updateUsuarioDto.fechaNacimiento !== null &&
+        (typeof updateUsuarioDto.fechaNacimiento === 'string' ? updateUsuarioDto.fechaNacimiento !== '' : true)
+      ) {
         updateData.fechaDeNacimiento = updateUsuarioDto.fechaNacimiento;
       }
       if (updateUsuarioDto.email !== undefined && updateUsuarioDto.email.trim() !== '') {
@@ -154,48 +177,65 @@ export class UsuariosService {
       }
 
       const user = await this.prisma.usuario.update({
-         where: { id },
-         data: updateData
-        });
-        
-        const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
-        console.log(path);
-        if(existsSync(path)){
-          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-        }
+        where: { id },
+        data: updateData,
+      });
+
+      const path = join(process.cwd(), 'img', 'usuarios', user.fotoPerfil?.split('/').pop() as string);
+      console.log(path);
+      if (existsSync(path)) {
+        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+      }
       return user;
     } catch (error) {
-      if(updateUsuarioDto.fotoPerfil){
+      if (updateUsuarioDto.fotoPerfil) {
         const path = join(process.cwd(), 'img', 'usuarios', updateUsuarioDto.fotoPerfil.split('/').pop() as string);
-        if(existsSync(path)){
+        if (existsSync(path)) {
           unlinkSync(path);
         }
       }
-      throw new Error(error);
+      throw new CustomError(error.message || 'Error al actualizar el usuario', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async remove(id: string) {
     try {
-      const user = await this.prisma.usuario.update({ where: { id:id }, data: { isDeleted: true } });
-      return {message: 'Usuario eliminado correctamente'};
+      if (!id) {
+        throw new Error('El id es requerido');
+      }
+      const user = await this.prisma.usuario.update({ where: { id: id }, data: { isDeleted: true } });
+      return { message: 'Usuario eliminado correctamente' };
     } catch (error) {
-      throw new Error(error);
+      throw new CustomError(error.message || 'Error al eliminar el usuario', error.status || HttpStatus.BAD_REQUEST);
     }
   }
 
   async guardarJuego(id: string, nombre: string, datosDeGuardado: Buffer, usuarioId: string) {
-    const guardado = await this.prisma.guardado.create({
-      data: { juegoId: id, nombre, datosDeGuardado, usuarioId },
-    });
-    return guardado;
+    try {
+      if (!id || !nombre || !datosDeGuardado || !usuarioId) {
+        throw new Error('El id, nombre, datosDeGuardado y usuarioId son requeridos');
+      }
+      const guardado = await this.prisma.guardado.create({
+        data: { juegoId: id, nombre, datosDeGuardado, usuarioId },
+      });
+      return guardado;
+    } catch (error) {
+      throw new CustomError(error.message || 'Error al guardar el juego', error.status || HttpStatus.BAD_REQUEST);
+    }
   }
 
   async cargarJuego(id: string, usuarioId: string) {
-    const guardado = await this.prisma.guardado.findUnique({ where: { juegoId: id, usuarioId } });
-    if (!guardado) {
-      throw new Error('Guardado no encontrado');
+    try {
+      if (!id || !usuarioId) {
+        throw new Error('El id y el usuarioId son requeridos');
+      }
+      const guardado = await this.prisma.guardado.findUnique({ where: { juegoId: id, usuarioId } });
+      if (!guardado) {
+        throw new Error('Guardado no encontrado');
+      }
+      return { datosDeGuardado: guardado.datosDeGuardado, fechaActualizacion: guardado.fechaActualizacion };
+    } catch (error) {
+      throw new CustomError(error.message || 'Error al cargar el juego', error.status || HttpStatus.BAD_REQUEST);
     }
-    return {datosDeGuardado: guardado.datosDeGuardado, fechaActualizacion: guardado.fechaActualizacion};
   }
 }

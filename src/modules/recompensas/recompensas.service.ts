@@ -11,13 +11,13 @@ export class RecompensasService {
 
   async create(createRecompensaDto: CreateRecompensaDto) {
     try {
-    return  await this.prisma.recompensa.create({
-      data: createRecompensaDto,
-    });
+      return await this.prisma.recompensa.create({
+        data: createRecompensaDto,
+      });
     } catch (error) {
-      if(createRecompensaDto.foto){
+      if (createRecompensaDto.foto) {
         const path = join(process.cwd(), 'img', 'recompensas', createRecompensaDto.foto.split('/').pop() as string);
-        if(existsSync(path)){
+        if (existsSync(path)) {
           unlinkSync(path);
         }
       }
@@ -46,22 +46,21 @@ export class RecompensasService {
       if (recompensa.cantidad === 0) {
         throw new Error('No hay suficientes recompensas disponibles');
       }
-        const canje = await this.prisma.canje.create({
-          data: {recompensaId, usuarioId},
-        });
-        if (!canje) {
-          throw new Error('Error al crear el canje');
-        }
-        await this.prisma.recompensa.update({
-          where: { id: recompensaId },
-          data: { cantidad: { decrement: 1 } },
-        });
-        await this.prisma.usuario.update({
-          where: { id: usuarioId },
-          data: { puntos: { decrement: recompensa.puntos } },
-        });
-        return { message: 'Canje creado correctamente' };
-        
+      const canje = await this.prisma.canje.create({
+        data: { recompensaId, usuarioId },
+      });
+      if (!canje) {
+        throw new Error('Error al crear el canje');
+      }
+      await this.prisma.recompensa.update({
+        where: { id: recompensaId },
+        data: { cantidad: { decrement: 1 } },
+      });
+      await this.prisma.usuario.update({
+        where: { id: usuarioId },
+        data: { puntos: { decrement: recompensa.puntos } },
+      });
+      return { message: 'Canje creado correctamente' };
     } catch (error) {
       throw new CustomError(error.message || 'Error al crear el canje', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -69,53 +68,59 @@ export class RecompensasService {
 
   async findAll() {
     try {
-    const recompensas = await this.prisma.recompensa.findMany({
-      where: { isDeleted: false, cantidad: { gt: 0 } },
-    });
-    recompensas.map((recompensa) => {
-      const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
-      if(existsSync(path)){
-        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
-      }
-    });
-    return recompensas;
+      const recompensas = await this.prisma.recompensa.findMany({
+        where: { isDeleted: false, cantidad: { gt: 0 } },
+      });
+      recompensas.map((recompensa) => {
+        const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
+        if (existsSync(path)) {
+          recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+        }
+      });
+      return recompensas;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener las recompensas', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al obtener las recompensas',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async findOne(id: string) {
     try {
-      if(!id){
+      if (!id) {
         throw new Error('El id es requerido');
       }
       const recompensa = await this.prisma.recompensa.findUnique({
-      where: { id, isDeleted: false },
-    });
-    if (!recompensa) {
-      throw new Error('Recompensa no encontrada');
-    }
-    const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
-    if(existsSync(path)){
-      recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
-    }
-    return recompensa;
-  }catch (error) {
-      throw new CustomError(error.message || 'Error al obtener las recompensas', error.status || HttpStatus.BAD_REQUEST);
+        where: { id, isDeleted: false },
+      });
+      if (!recompensa) {
+        throw new Error('Recompensa no encontrada');
+      }
+      const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
+      if (existsSync(path)) {
+        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+      }
+      return recompensa;
+    } catch (error) {
+      throw new CustomError(
+        error.message || 'Error al obtener las recompensas',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
-  
+
   async findAllCanjesOnUser(usuarioId: string) {
     try {
-      if(!usuarioId){
+      if (!usuarioId) {
         throw new Error('El id del usuario es requerido');
       }
       return await this.prisma.canje.findMany({
-      where: { usuarioId, isDeleted: false },
-      include: {
-        recompensa: true,
-      },
-    });
+        where: { usuarioId, isDeleted: false },
+        include: {
+          recompensa: true,
+        },
+      });
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener los canjes', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -123,29 +128,32 @@ export class RecompensasService {
 
   async update(id: string, updateRecompensaDto: UpdateRecompensaDto) {
     try {
-      if(!id){
+      if (!id) {
         throw new Error('El id es requerido');
       }
-     await this.prisma.recompensa.update({
-      where: { id },
-      data: updateRecompensaDto,
-    });
-    return { message: 'Recompensa actualizada correctamente' };
-  }catch (error) {
-      throw new CustomError(error.message || 'Error al actualizar la recompensa', error.status || HttpStatus.BAD_REQUEST);
+      await this.prisma.recompensa.update({
+        where: { id },
+        data: updateRecompensaDto,
+      });
+      return { message: 'Recompensa actualizada correctamente' };
+    } catch (error) {
+      throw new CustomError(
+        error.message || 'Error al actualizar la recompensa',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async remove(id: string) {
     try {
-      if(!id){
+      if (!id) {
         throw new Error('El id es requerido');
       }
       await this.prisma.recompensa.delete({
-      where: { id },
-    });
-    return { message: 'Recompensa eliminada correctamente' };
-  }catch (error) {
+        where: { id },
+      });
+      return { message: 'Recompensa eliminada correctamente' };
+    } catch (error) {
       throw new CustomError(error.message || 'Error al eliminar la recompensa', error.status || HttpStatus.BAD_REQUEST);
     }
   }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {IsEmail, IsNotEmpty, IsString, Length, MinLength, IsDate} from 'class-validator';
+import {IsEmail, IsNotEmpty, IsString, Length, MinLength, IsDate, Matches} from 'class-validator';
 import { transformDateString } from 'src/utils/date-transformer';
 
 export class RegisterUserDto {
@@ -25,6 +25,7 @@ export class RegisterUserDto {
   @IsString({message: 'La contraseña debe ser un string'})
   @IsNotEmpty({message: 'La contraseña es requerida'})
   @MinLength(8,{message: 'La contraseña debe tener al menos 8 caracteres'})
+  @Matches(/^(?=.*[A-Z])(?=.*\d).+$/, { message: 'La contraseña debe contener al menos una letra mayúscula y un número' })
   password: string;
 
   @ApiProperty({description: 'User birth date',example: '20-04-1996'})

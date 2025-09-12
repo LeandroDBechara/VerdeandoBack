@@ -1,10 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { IntercambiosService } from './intercambios.service';
-import {
-  CreateIntercambioDto,
-  UpdateIntercambioDto,
-  ConfirmarIntercambioDto,
-} from './dto/create-intercambio.dto';
+import { CreateIntercambioDto, UpdateIntercambioDto, ConfirmarIntercambioDto } from './dto/create-intercambio.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -27,9 +23,7 @@ export class IntercambiosController {
   })
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Post()
-  async create(
-    @Body() createIntercambioDto: CreateIntercambioDto,
-  ) {
+  async create(@Body() createIntercambioDto: CreateIntercambioDto) {
     return this.intercambiosService.create(createIntercambioDto);
   }
 

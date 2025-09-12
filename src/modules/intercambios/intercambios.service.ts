@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { ConfirmarIntercambioDto, CreateDetalleIntercambioDto, CreateIntercambioDto, UpdateIntercambioDto } from './dto/create-intercambio.dto';
+import {ConfirmarIntercambioDto, CreateIntercambioDto, UpdateIntercambioDto} from './dto/create-intercambio.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventosService } from '../eventos/eventos.service';
@@ -10,7 +10,7 @@ export class IntercambiosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly eventosService: EventosService
+    private readonly eventosService: EventosService,
   ) {}
 
   async create(createIntercambioDto: CreateIntercambioDto) {
@@ -21,7 +21,7 @@ export class IntercambiosService {
       // Calcular totales primero
       for (const detalle of createIntercambioDto.detalles) {
         const residuo = await this.prisma.residuo.findFirst({
-          where: { id: detalle.residuoId }
+          where: { id: detalle.residuoId },
         });
 
         if (residuo) {
@@ -30,16 +30,16 @@ export class IntercambiosService {
           detalles.push({
             residuoId: detalle.residuoId,
             pesoGramos: detalle.pesoGramos,
-            puntosTotal: detalle.pesoGramos * residuo.puntosKg
+            puntosTotal: detalle.pesoGramos * residuo.puntosKg,
           });
         }
       }
       // Validar si el codigo de cupon es valido
       let eventoId: string | null = null;
-      if(createIntercambioDto.codigoCupon){
-          const evento = await this.eventosService.validarCodigo(createIntercambioDto.codigoCupon);
-          if(evento){
-            puntosTotal = evento.multiplicador * puntosTotal;
+      if (createIntercambioDto.codigoCupon) {
+        const evento = await this.eventosService.validarCodigo(createIntercambioDto.codigoCupon);
+        if (evento) {
+          puntosTotal = evento.multiplicador * puntosTotal;
           eventoId = evento.id;
         }
       }
@@ -53,20 +53,17 @@ export class IntercambiosService {
           fecha: new Date(),
           fechaLimite: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
           detalleIntercambio: {
-            create: detalles.map(detalle => ({
+            create: detalles.map((detalle) => ({
               residuoId: detalle.residuoId,
               pesoGramos: detalle.pesoGramos,
-              puntosTotal: detalle.puntosTotal
-            }))
-          }
-          }
+              puntosTotal: detalle.puntosTotal,
+            })),
+          },
+        },
       });
 
       // Generar JWT con duración de una semana
-      const token = await this.jwtService.signAsync(
-        { intercambioId: intercambio.id },
-        { expiresIn: '7d' }
-      );
+      const token = await this.jwtService.signAsync({ intercambioId: intercambio.id }, { expiresIn: '7d' });
 
       // Actualizar el intercambio con el token
       const intercambioActualizado = await this.prisma.intercambio.update({
@@ -77,8 +74,15 @@ export class IntercambiosService {
           colaborador: { select: { id: true } },
           puntoVerde: { select: { id: true, nombre: true } },
           evento: { select: { id: true, titulo: true } },
-          detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
-        }
+          detalleIntercambio: {
+            select: {
+              id: true,
+              residuo: { select: { id: true, material: true } },
+              pesoGramos: true,
+              puntosTotal: true,
+            },
+          },
+        },
       });
       return intercambioActualizado;
     } catch (error) {
@@ -98,71 +102,79 @@ export class IntercambiosService {
 
       // Buscar el intercambio
       const intercambio = await this.prisma.intercambio.findUnique({
-        where: { 
+        where: {
           id: intercambioId,
           isDeleted: false,
-        }
+        },
       });
 
       if (!intercambio) {
         throw new NotFoundException('Intercambio no encontrado o vencido');
       }
 
-      if (intercambio?.estado === "REALIZADO") {
+      if (intercambio?.estado === 'REALIZADO') {
         throw new Error('Este intercambio ya ha sido realizado');
       }
 
-      if (intercambio?.estado === "CANCELADO") {
+      if (intercambio?.estado === 'CANCELADO') {
         throw new Error('Este intercambio ha sido cancelado');
       }
 
       const puntoVerde = await this.prisma.puntoVerde.findUnique({
-        where: { id: puntoVerdeId, isDeleted: false,colaboradorId: colaboradorId}
+        where: { id: puntoVerdeId, isDeleted: false, colaboradorId: colaboradorId },
       });
 
       if (!puntoVerde) {
         throw new NotFoundException('Punto Verde no encontrado o no pertenece al colaborador');
       }
 
-      if(intercambio.eventoId){
+      if (intercambio.eventoId) {
         const evento = await this.prisma.evento.findUnique({
-          where: { id: intercambio.eventoId, isDeleted: false }
+          where: { id: intercambio.eventoId, isDeleted: false },
         });
-        if(!evento){
+        if (!evento) {
           throw new NotFoundException('Evento no encontrado');
         }
-        if(!evento.puntosVerdesPermitidos.includes(puntoVerdeId)){
+        if (!evento.puntosVerdesPermitidos.includes(puntoVerdeId)) {
           throw new NotFoundException('Punto Verde no permitido para este evento');
         }
-        if(evento.fechaFin < new Date()){
+        if (evento.fechaFin < new Date()) {
           throw new NotFoundException('El evento ha finalizado');
         }
-        if(evento.fechaInicio > new Date()){
+        if (evento.fechaInicio > new Date()) {
           throw new NotFoundException('El evento no ha comenzado');
         }
       }
 
       const intercambioActualizado = await this.prisma.intercambio.update({
         where: { id: intercambioId },
-        data: { fechaRealizado: new Date(),
+        data: {
+          fechaRealizado: new Date(),
           colaboradorId: colaboradorId,
           puntoVerdeId: puntoVerdeId,
-          estado: "REALIZADO"
+          estado: 'REALIZADO',
+        },
+        include: {
+          usuario: { select: { id: true, nombre: true, apellido: true } },
+          colaborador: { select: { id: true } },
+          puntoVerde: { select: { id: true, nombre: true } },
+          evento: { select: { id: true, titulo: true } },
+          detalleIntercambio: {
+            select: {
+              id: true,
+              residuo: { select: { id: true, material: true } },
+              pesoGramos: true,
+              puntosTotal: true,
+            },
           },
-          include: {
-            usuario: { select: { id: true, nombre: true, apellido: true } },
-            colaborador: { select: { id: true } },
-            puntoVerde: { select: { id: true, nombre: true } },
-            evento: { select: { id: true, titulo: true } },
-            detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
-          }
+        },
       });
 
-      if(intercambioActualizado){
+      if (intercambioActualizado) {
         const usuario = await this.prisma.usuario.findUnique({
-          where: { id: intercambio?.usuarioId, isDeleted: false }
+          where: { id: intercambio?.usuarioId, isDeleted: false },
         });
-        if(usuario){
+        if (usuario) {
           usuario.puntos += intercambioActualizado.totalPuntos;
           await this.prisma.usuario.update({ where: { id: usuario.id }, data: { puntos: usuario.puntos } });
         }
@@ -177,45 +189,51 @@ export class IntercambiosService {
       if (error.name === 'TokenExpiredError') {
         throw new Error('El token ha expirado');
       }
-      throw new CustomError(error.message || 'Error al confirmar el intercambio', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al confirmar el intercambio',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async cancelarIntercambio(id: string) {
     try {
-      if(!id){
+      if (!id) {
         throw new Error('El id es requerido');
       }
       await this.prisma.intercambio.update({
-      where: { id, isDeleted: false },
-      data: { estado: "CANCELADO"}
-    });
-      const mensaje: string = "intercambio cancelado correctamente";
+        where: { id, isDeleted: false },
+        data: { estado: 'CANCELADO' },
+      });
+      const mensaje: string = 'intercambio cancelado correctamente';
       return mensaje;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al cancelar el intercambio', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al cancelar el intercambio',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async findAllByUsuarioId(usuarioId: string) {
     try {
-      if(!usuarioId){
+      if (!usuarioId) {
         throw new Error('El usuarioId es requerido');
       }
 
       const intercambios = await this.prisma.intercambio.findMany({
-        where: { usuarioId, isDeleted: false }
+        where: { usuarioId, isDeleted: false },
       });
 
-      if(intercambios.length === 0){
+      if (intercambios.length === 0) {
         throw new Error('Este usuario no tiene intercambios');
       }
 
-      for(const intercambio of intercambios){
-        if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
+      for (const intercambio of intercambios) {
+        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()) {
           await this.prisma.intercambio.update({
             where: { id: intercambio.id },
-            data: { estado: "EXPIRADO" }
+            data: { estado: 'EXPIRADO' },
           });
         }
       }
@@ -226,73 +244,99 @@ export class IntercambiosService {
           colaborador: { select: { id: true } },
           puntoVerde: { select: { id: true, nombre: true } },
           evento: { select: { id: true, titulo: true } },
-          detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
-        }
+          detalleIntercambio: {
+            select: {
+              id: true,
+              residuo: { select: { id: true, material: true } },
+              pesoGramos: true,
+              puntosTotal: true,
+            },
+          },
+        },
       });
-      if(intercambiosActualizados.length === 0){
+      if (intercambiosActualizados.length === 0) {
         throw new Error('Este usuario no tiene intercambios');
       }
       return intercambiosActualizados;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener los intercambios', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al obtener los intercambios',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
-    
   }
 
   async findAll() {
     try {
-    const intercambios = await this.prisma.intercambio.findMany({
-      where: { isDeleted: false }
-    });
-    if(intercambios.length === 0){
-      throw new Error('No se encontraron intercambios');
-    }
-    for(const intercambio of intercambios){
-      if(intercambio.fechaLimite && intercambio.fechaLimite < new Date()){
-        await this.prisma.intercambio.update({
-          where: { id: intercambio.id },  
-          data: { estado: "EXPIRADO" }
-        });
+      const intercambios = await this.prisma.intercambio.findMany({
+        where: { isDeleted: false },
+      });
+      if (intercambios.length === 0) {
+        throw new Error('No se encontraron intercambios');
       }
-    }
-    const intercambiosActualizados = await this.prisma.intercambio.findMany({
-      where: { isDeleted: false },
-      include: {
-        usuario: { select: { id: true, nombre: true, apellido: true } },
-        colaborador: { select: { id: true } },
-        puntoVerde: { select: { id: true, nombre: true } },
-        evento: { select: { id: true, titulo: true } },
-        detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
+      for (const intercambio of intercambios) {
+        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()) {
+          await this.prisma.intercambio.update({
+            where: { id: intercambio.id },
+            data: { estado: 'EXPIRADO' },
+          });
+        }
       }
-    }); 
-    if(intercambiosActualizados.length === 0){
-      throw new Error('No se encontraron intercambios');
-    }
-    return intercambiosActualizados;
+      const intercambiosActualizados = await this.prisma.intercambio.findMany({
+        where: { isDeleted: false },
+        include: {
+          usuario: { select: { id: true, nombre: true, apellido: true } },
+          colaborador: { select: { id: true } },
+          puntoVerde: { select: { id: true, nombre: true } },
+          evento: { select: { id: true, titulo: true } },
+          detalleIntercambio: {
+            select: {
+              id: true,
+              residuo: { select: { id: true, material: true } },
+              pesoGramos: true,
+              puntosTotal: true,
+            },
+          },
+        },
+      });
+      if (intercambiosActualizados.length === 0) {
+        throw new Error('No se encontraron intercambios');
+      }
+      return intercambiosActualizados;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener los intercambios', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al obtener los intercambios',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async findOne(id: string) {
     try {
-    if(!id){
-      throw new Error('El id es requerido');
-    }
-    const intercambio = await this.prisma.intercambio.findUnique({
-      where: { id, isDeleted: false },
-      include: {
-        usuario: { select: { id: true, nombre: true, apellido: true } },
-        colaborador: { select: { id: true } },
-        puntoVerde: { select: { id: true, nombre: true } },
-        evento: { select: { id: true, titulo: true } },
-        detalleIntercambio: { select: { id: true, residuo: { select: { id: true, material: true } }, pesoGramos: true, puntosTotal: true } }
+      if (!id) {
+        throw new Error('El id es requerido');
       }
-    });
-    if(!intercambio){
-      throw new Error('Intercambio no encontrado');
-    }
-    return intercambio;
+      const intercambio = await this.prisma.intercambio.findUnique({
+        where: { id, isDeleted: false },
+        include: {
+          usuario: { select: { id: true, nombre: true, apellido: true } },
+          colaborador: { select: { id: true } },
+          puntoVerde: { select: { id: true, nombre: true } },
+          evento: { select: { id: true, titulo: true } },
+          detalleIntercambio: {
+            select: {
+              id: true,
+              residuo: { select: { id: true, material: true } },
+              pesoGramos: true,
+              puntosTotal: true,
+            },
+          },
+        },
+      });
+      if (!intercambio) {
+        throw new Error('Intercambio no encontrado');
+      }
+      return intercambio;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el intercambio', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -300,37 +344,43 @@ export class IntercambiosService {
 
   async update(id: string, updateIntercambioDto: UpdateIntercambioDto) {
     try {
-    if(!id){
-      throw new Error('El id es requerido');
-    }
-    const intercambio = await this.prisma.intercambio.update({
-      where: { id, isDeleted: false },
-      data: updateIntercambioDto
-    });
-    if(!intercambio){
-      throw new Error('Intercambio no encontrado');
-    }
-    return intercambio;
+      if (!id) {
+        throw new Error('El id es requerido');
+      }
+      const intercambio = await this.prisma.intercambio.update({
+        where: { id, isDeleted: false },
+        data: updateIntercambioDto,
+      });
+      if (!intercambio) {
+        throw new Error('Intercambio no encontrado');
+      }
+      return intercambio;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al actualizar el intercambio', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al actualizar el intercambio',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   async remove(id: string) {
     try {
-    if(!id){
-      throw new Error('El id es requerido');
-    }
-    const intercambio = await this.prisma.intercambio.update({
-      where: { id, isDeleted: false },
-      data: { isDeleted: true }
-    });
-    if(!intercambio){
-      throw new Error('Intercambio no encontrado');
-    }
-    return intercambio;
+      if (!id) {
+        throw new Error('El id es requerido');
+      }
+      const intercambio = await this.prisma.intercambio.update({
+        where: { id, isDeleted: false },
+        data: { isDeleted: true },
+      });
+      if (!intercambio) {
+        throw new Error('Intercambio no encontrado');
+      }
+      return intercambio;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al eliminar el intercambio', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al eliminar el intercambio',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

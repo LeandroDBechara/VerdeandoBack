@@ -16,7 +16,6 @@ export class ResiduosController {
   constructor(private readonly residuosService: ResiduosService) {}
 
   @ApiCustomOperation({
-
     summary: 'Crear un residuo',
     bodyType: CreateResiduoDto,
     responseStatus: 200,
@@ -29,7 +28,6 @@ export class ResiduosController {
   }
 
   @ApiCustomOperation({
-
     summary: 'Obtener todos los residuos',
     responseStatus: 200,
     responseDescription: 'Residuos obtenidos correctamente',
@@ -41,7 +39,6 @@ export class ResiduosController {
   }
 
   @ApiCustomOperation({
-
     summary: 'Obtener un residuo por id',
     responseStatus: 200,
     responseDescription: 'Residuo obtenido correctamente',
@@ -53,7 +50,6 @@ export class ResiduosController {
   }
 
   @ApiCustomOperation({
-
     summary: 'Actualizar un residuo por id',
     bodyType: CreateResiduoDto,
     responseStatus: 200,
@@ -66,7 +62,6 @@ export class ResiduosController {
   }
 
   @ApiCustomOperation({
-
     summary: 'Eliminar un residuo por id',
     responseStatus: 200,
     responseDescription: 'Residuo eliminado correctamente',

@@ -1,6 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile} from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateColaboradorDto, CreateUsuarioDto, UpdateColaboradorDto, UpdateUsuarioDto } from './dto/create-usuario.dto';
+import {
+  CreateColaboradorDto,
+  CreateUsuarioDto,
+  UpdateColaboradorDto,
+  UpdateUsuarioDto,
+} from './dto/create-usuario.dto';
 import { ApiBearerAuth, ApiBody, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -49,7 +54,6 @@ export class UsuariosController {
     responseStatus: 200,
     responseDescription: 'Colaborador actualizado correctamente',
   })
-
   @Patch('/colaborador/:id')
   @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
   updateColaborador(@Param('id') id: string, @Body() updateColaboradorDto: UpdateColaboradorDto) {
@@ -91,69 +95,70 @@ export class UsuariosController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'Archivo de imagen para la foto de perfil'
+          description: 'Archivo de imagen para la foto de perfil',
         },
         nombre: {
           type: 'string',
           description: 'Nombre del usuario',
-          example: 'Juan'
+          example: 'Juan',
         },
         apellido: {
           type: 'string',
           description: 'Apellido del usuario',
-          example: 'Pérez'
+          example: 'Pérez',
         },
         fechaNacimiento: {
           type: 'string',
           format: 'date',
           description: 'Fecha de nacimiento',
-          example: '2000-01-01'
+          example: '2000-01-01',
         },
         email: {
           type: 'string',
           format: 'email',
           description: 'Email del usuario',
-          example: 'juan@example.com'
+          example: 'juan@example.com',
         },
         direccion: {
           type: 'string',
           description: 'Dirección del usuario',
-          example: 'Calle 123, Ciudad'
-        }
-      }
-    }
+          example: 'Calle 123, Ciudad',
+        },
+      },
+    },
   })
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = join(process.cwd(), 'img', 'usuarios');
-        if (!existsSync(uploadPath)) {
-          mkdirSync(uploadPath, { recursive: true });
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'img', 'usuarios');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExt = extname(file.originalname);
+          cb(null, `${uniqueSuffix}${fileExt}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
         }
-        cb(null, uploadPath);
       },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const fileExt = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${fileExt}`);
-      },
+      limits: { fileSize: 5 * 1024 * 1024 },
     }),
-    fileFilter: (req, file, cb) => {
-      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
-      }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },
-  }))
-  
-    update(@Param('id') id: string, @Body() body: any, @UploadedFile() file?: Express.Multer.File) {
+  )
+  update(@Param('id') id: string, @Body() body: any, @UploadedFile() file?: Express.Multer.File) {
     // Filtrar el campo 'file' del body y crear el DTO
     const { file: _, ...updateData } = body;
     const updateUsuarioDto: UpdateUsuarioDto = updateData;
-    
+
     if (file) {
       // Servido como estático en /img
       updateUsuarioDto.fotoPerfil = `/img/usuarios/${file.filename}` as any;
@@ -185,8 +190,13 @@ export class UsuariosController {
   })
   @Post('/guardar-juego')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  guardarJuego(@Body() guardarJuegoDto: {id: string, nombre: string, datosDeGuardado: Buffer, usuarioId: string}) {
-    return this.usuariosService.guardarJuego(guardarJuegoDto.id, guardarJuegoDto.nombre, guardarJuegoDto.datosDeGuardado, guardarJuegoDto.usuarioId);
+  guardarJuego(@Body() guardarJuegoDto: { id: string; nombre: string; datosDeGuardado: Buffer; usuarioId: string }) {
+    return this.usuariosService.guardarJuego(
+      guardarJuegoDto.id,
+      guardarJuegoDto.nombre,
+      guardarJuegoDto.datosDeGuardado,
+      guardarJuegoDto.usuarioId,
+    );
   }
 
   @ApiCustomOperation({
@@ -200,7 +210,7 @@ export class UsuariosController {
   })
   @Get('/cargar-juego')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
-  cargarJuego(@Body() cargarJuegoDto: {id: string, usuarioId: string}) {
+  cargarJuego(@Body() cargarJuegoDto: { id: string; usuarioId: string }) {
     return this.usuariosService.cargarJuego(cargarJuegoDto.id, cargarJuegoDto.usuarioId);
   }
 }

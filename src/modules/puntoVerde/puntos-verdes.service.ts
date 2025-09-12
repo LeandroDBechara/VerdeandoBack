@@ -14,51 +14,59 @@ export class PuntosVerdesService {
       const { descripcion, imagen, ...puntosVerdeData } = createPuntosVerdeDto;
       const existPV = await this.prisma.puntoVerde.findFirst({
         where: {
-        direccion: puntosVerdeData.direccion,
-        isDeleted: false,
-        nombre: puntosVerdeData.nombre,
-      },
-    });
+          direccion: puntosVerdeData.direccion,
+          isDeleted: false,
+          nombre: puntosVerdeData.nombre,
+        },
+      });
 
-    if (existPV) {
-      throw new Error('El punto verde ya existe');
-    }
-    
-    const puntosVerde = await this.prisma.puntoVerde.create({
-      data: {
-        ...puntosVerdeData,
-        descripcion: descripcion,
-        imagen: imagen,
-      },
-    });
-    return puntosVerde;
+      if (existPV) {
+        throw new Error('El punto verde ya existe');
+      }
+
+      const puntosVerde = await this.prisma.puntoVerde.create({
+        data: {
+          ...puntosVerdeData,
+          descripcion: descripcion,
+          imagen: imagen,
+        },
+      });
+      return puntosVerde;
     } catch (error) {
-      if(createPuntosVerdeDto.imagen){
-        const path = join(process.cwd(), 'img', 'puntos-verdes', createPuntosVerdeDto.imagen.split('/').pop() as string);
-        if(existsSync(path)){
+      if (createPuntosVerdeDto.imagen) {
+        const path = join(
+          process.cwd(),
+          'img',
+          'puntos-verdes',
+          createPuntosVerdeDto.imagen.split('/').pop() as string,
+        );
+        if (existsSync(path)) {
           unlinkSync(path);
         }
       }
       throw new CustomError(error.message || 'Error al crear el punto verde', error.status || HttpStatus.BAD_REQUEST);
     }
   }
-  
+
   async findAll() {
     try {
       const puntosVerdes = await this.prisma.puntoVerde.findMany({
         where: {
           isDeleted: false,
-      },
-    });
-    puntosVerdes.map((puntoVerde) => {
-      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-      if(existsSync(path)){
-        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-      }
-    });    
-    return puntosVerdes;
+        },
+      });
+      puntosVerdes.map((puntoVerde) => {
+        const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
+        if (existsSync(path)) {
+          puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+        }
+      });
+      return puntosVerdes;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener los puntos verdes', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al obtener los puntos verdes',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -77,7 +85,7 @@ export class PuntosVerdesService {
         throw new Error('El punto verde no existe');
       }
       const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-      if(existsSync(path)){
+      if (existsSync(path)) {
         puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
       }
       return puntoVerde;
@@ -118,18 +126,26 @@ export class PuntosVerdesService {
         throw new Error('El punto verde no existe o no pertenece al colaborador');
       }
       const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-      if(existsSync(path)){
+      if (existsSync(path)) {
         puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
       }
       return puntoVerde;
     } catch (error) {
-      if(updatePuntosVerdeDto.imagen){
-        const path = join(process.cwd(), 'img', 'puntos-verdes', updatePuntosVerdeDto.imagen.split('/').pop() as string);
-        if(existsSync(path)){
+      if (updatePuntosVerdeDto.imagen) {
+        const path = join(
+          process.cwd(),
+          'img',
+          'puntos-verdes',
+          updatePuntosVerdeDto.imagen.split('/').pop() as string,
+        );
+        if (existsSync(path)) {
           unlinkSync(path);
         }
       }
-      throw new CustomError(error.message || 'Error al actualizar el punto verde', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al actualizar el punto verde',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -154,7 +170,10 @@ export class PuntosVerdesService {
       }
       return { message: 'Punto verde eliminado correctamente' };
     } catch (error) {
-      throw new CustomError(error.message || 'Error al eliminar el punto verde', error.status || HttpStatus.BAD_REQUEST);
+      throw new CustomError(
+        error.message || 'Error al eliminar el punto verde',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

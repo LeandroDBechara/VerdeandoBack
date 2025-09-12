@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors} from '@nestjs/common';
 import { RecompensasService } from './recompensas.service';
 import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
@@ -26,40 +26,44 @@ export class RecompensasController {
     responseDescription: 'Recompensa creada correctamente',
   })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({schema: {
-    type: 'object',
-    properties: {      
-      titulo: { type: 'string', description: 'Titulo de la recompensa' , example: 'Recompensa 1'},
-      descripcion: { type: 'string', description: 'Descripción de la recompensa' , example: 'Recompensa 1'},
-      puntos: { type: 'number', description: 'Puntos de la recompensa' , example: 100},
-      cantidad: { type: 'number', description: 'Cantidad de la recompensa' , example: 100},
-      foto: { type: 'string', format: 'binary' }
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        titulo: { type: 'string', description: 'Titulo de la recompensa', example: 'Recompensa 1' },
+        descripcion: { type: 'string', description: 'Descripción de la recompensa', example: 'Recompensa 1' },
+        puntos: { type: 'number', description: 'Puntos de la recompensa', example: 100 },
+        cantidad: { type: 'number', description: 'Cantidad de la recompensa', example: 100 },
+        foto: { type: 'string', format: 'binary' },
+      },
     },
-  }}) 
-  @UseInterceptors(FileInterceptor('foto', {
-    fileFilter: (req, file, cb) => {
-      if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
-      }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 },
-    storage: diskStorage({
-      destination: (req, file, cb) => {
-        const uploadPath = join(process.cwd(), 'img', 'recompensas');
-        if (!existsSync(uploadPath)) {
-          mkdirSync(uploadPath, { recursive: true });
+  })
+  @UseInterceptors(
+    FileInterceptor('foto', {
+      fileFilter: (req, file, cb) => {
+        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
         }
-        cb(null, uploadPath);
       },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const fileExt = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${fileExt}`);
-      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'img', 'recompensas');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExt = extname(file.originalname);
+          cb(null, `${uniqueSuffix}${fileExt}`);
+        },
+      }),
     }),
-  }))
+  )
   @Roles(RoleEnum.ADMIN)
   @Post()
   create(@Body() createRecompensaDto: CreateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
@@ -109,7 +113,7 @@ export class RecompensasController {
     responseDescription: 'Canjes obtenidos correctamente',
   })
   @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
-  @Get('canjes/:usuarioId') 
+  @Get('canjes/:usuarioId')
   findAllCanjesOnUser(@Param('usuarioId') usuarioId: string) {
     return this.recompensasService.findAllCanjesOnUser(usuarioId);
   }
