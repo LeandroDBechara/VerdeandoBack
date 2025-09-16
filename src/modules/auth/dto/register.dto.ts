@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {IsEmail, IsNotEmpty, IsString, Length, MinLength, IsDate, Matches} from 'class-validator';
-import { transformDateString } from 'src/utils/date-transformer';
+import { transformDateString } from 'src/common/utils/date-transformer';
 
 export class RegisterUserDto {
   @ApiProperty({description: 'User name',example: 'joe'})

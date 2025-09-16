@@ -3,7 +3,7 @@ import {ConfirmarIntercambioDto, CreateIntercambioDto, UpdateIntercambioDto} fro
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventosService } from '../eventos/eventos.service';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 
 @Injectable()
 export class IntercambiosService {

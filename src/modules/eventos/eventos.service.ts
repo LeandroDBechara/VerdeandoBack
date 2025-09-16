@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
@@ -10,6 +10,8 @@ export class EventosService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createEventoDto: CreateEventoDto) {
     try {
+      console.log( 'createEventoDto: ', createEventoDto);
+      console.log( 'fecha actual: ', new Date());
       if (createEventoDto.codigo) {
         const evento = await this.prisma.evento.findFirst({
           where: { codigo: createEventoDto.codigo, isDeleted: false },
@@ -61,9 +63,12 @@ export class EventosService {
       });
     } catch (error) {
       if (createEventoDto.imagen) {
-        const path = join(process.cwd(), 'img', 'eventos', createEventoDto.imagen.split('/').pop() as string);
-        if (existsSync(path)) {
-          unlinkSync(path);
+        const fileName = createEventoDto.imagen.split('/').pop();
+        if (fileName) {
+          const path = join(process.cwd(), 'img', 'eventos', fileName);
+          if (existsSync(path)) {
+            unlinkSync(path);
+          }
         }
       }
       console.log(error);
@@ -125,9 +130,14 @@ export class EventosService {
         },
       });
       eventos.map((evento) => {
-        const path = join(process.cwd(), 'img', 'eventos', evento.imagen?.split('/').pop() as string);
-        if (existsSync(path)) {
-          evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
+        if (evento.imagen) {
+          const fileName = evento.imagen.split('/').pop();
+          if (fileName) {
+            const path = join(process.cwd(), 'img', 'eventos', fileName);
+            if (existsSync(path)) {
+              evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
+            }
+          }
         }
       });
       return eventos;

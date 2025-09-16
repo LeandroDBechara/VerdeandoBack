@@ -3,12 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LoginAuthDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/common/interfaces/index';
-import { comparePassword, hashPassword, createTokens } from 'src/utils/encryption';
+import { comparePassword, hashPassword, createTokens } from 'src/common/utils/encryption';
 import { MessagingService } from '../messanging/messanging.service';
 import { messagingConfig } from 'src/common/constants';
 import { RecoverPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 import { RegisterUserDto } from './dto/register.dto';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 
 @Injectable()
 export class AuthService {
@@ -120,6 +120,16 @@ export class AuthService {
                 domicilioFiscal: true,
                 cuitCuil: true,
                 usuarioId: true,
+              },
+            },
+            comunidad: {
+              select: {
+                id: true,
+                nombre: true,
+                descripcion: true,
+                puntos: true,
+                historial: true,
+                isDeleted: true,
               },
             },
           },

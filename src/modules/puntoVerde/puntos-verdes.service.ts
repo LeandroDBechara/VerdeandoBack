@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
@@ -34,14 +34,17 @@ export class PuntosVerdesService {
       return puntosVerde;
     } catch (error) {
       if (createPuntosVerdeDto.imagen) {
-        const path = join(
-          process.cwd(),
-          'img',
-          'puntos-verdes',
-          createPuntosVerdeDto.imagen.split('/').pop() as string,
-        );
-        if (existsSync(path)) {
-          unlinkSync(path);
+        const fileName = createPuntosVerdeDto.imagen.split('/').pop();
+        if (fileName) {
+          const path = join(
+            process.cwd(),
+            'img',
+            'puntos-verdes',
+            fileName,
+          );
+          if (existsSync(path)) {
+            unlinkSync(path);
+          }
         }
       }
       throw new CustomError(error.message || 'Error al crear el punto verde', error.status || HttpStatus.BAD_REQUEST);
@@ -56,9 +59,14 @@ export class PuntosVerdesService {
         },
       });
       puntosVerdes.map((puntoVerde) => {
-        const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-        if (existsSync(path)) {
-          puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+        if (puntoVerde.imagen) {
+          const fileName = puntoVerde.imagen.split('/').pop();
+          if (fileName) {
+            const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
+            if (existsSync(path)) {
+              puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+            }
+          }
         }
       });
       return puntosVerdes;
@@ -84,9 +92,14 @@ export class PuntosVerdesService {
       if (!puntoVerde) {
         throw new Error('El punto verde no existe');
       }
-      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-      if (existsSync(path)) {
-        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+      if (puntoVerde.imagen) {
+        const fileName = puntoVerde.imagen.split('/').pop();
+        if (fileName) {
+          const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
+          if (existsSync(path)) {
+            puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+          }
+        }
       }
       return puntoVerde;
     } catch (error) {
@@ -125,21 +138,29 @@ export class PuntosVerdesService {
       if (!puntoVerde) {
         throw new Error('El punto verde no existe o no pertenece al colaborador');
       }
-      const path = join(process.cwd(), 'img', 'puntos-verdes', puntoVerde.imagen?.split('/').pop() as string);
-      if (existsSync(path)) {
-        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+      if (puntoVerde.imagen) {
+        const fileName = puntoVerde.imagen.split('/').pop();
+        if (fileName) {
+          const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
+          if (existsSync(path)) {
+            puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
+          }
+        }
       }
       return puntoVerde;
     } catch (error) {
       if (updatePuntosVerdeDto.imagen) {
-        const path = join(
-          process.cwd(),
-          'img',
-          'puntos-verdes',
-          updatePuntosVerdeDto.imagen.split('/').pop() as string,
-        );
-        if (existsSync(path)) {
-          unlinkSync(path);
+        const fileName = updatePuntosVerdeDto.imagen.split('/').pop();
+        if (fileName) {
+          const path = join(
+            process.cwd(),
+            'img',
+            'puntos-verdes',
+            fileName,
+          );
+          if (existsSync(path)) {
+            unlinkSync(path);
+          }
         }
       }
       throw new CustomError(

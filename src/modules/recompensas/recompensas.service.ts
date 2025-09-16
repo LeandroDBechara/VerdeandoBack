@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 import { existsSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
@@ -16,9 +16,12 @@ export class RecompensasService {
       });
     } catch (error) {
       if (createRecompensaDto.foto) {
-        const path = join(process.cwd(), 'img', 'recompensas', createRecompensaDto.foto.split('/').pop() as string);
-        if (existsSync(path)) {
-          unlinkSync(path);
+        const fileName = createRecompensaDto.foto.split('/').pop();
+        if (fileName) {
+          const path = join(process.cwd(), 'img', 'recompensas', fileName);
+          if (existsSync(path)) {
+            unlinkSync(path);
+          }
         }
       }
       throw new CustomError(error.message || 'Error al crear la recompensa', HttpStatus.BAD_REQUEST);
@@ -72,9 +75,14 @@ export class RecompensasService {
         where: { isDeleted: false, cantidad: { gt: 0 } },
       });
       recompensas.map((recompensa) => {
-        const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
-        if (existsSync(path)) {
-          recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+        if (recompensa.foto) {
+          const fileName = recompensa.foto.split('/').pop();
+          if (fileName) {
+            const path = join(process.cwd(), 'img', 'recompensas', fileName);
+            if (existsSync(path)) {
+              recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+            }
+          }
         }
       });
       return recompensas;
@@ -97,9 +105,14 @@ export class RecompensasService {
       if (!recompensa) {
         throw new Error('Recompensa no encontrada');
       }
-      const path = join(process.cwd(), 'img', 'recompensas', recompensa.foto?.split('/').pop() as string);
-      if (existsSync(path)) {
-        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+      if (recompensa.foto) {
+        const fileName = recompensa.foto.split('/').pop();
+        if (fileName) {
+          const path = join(process.cwd(), 'img', 'recompensas', fileName);
+          if (existsSync(path)) {
+            recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+          }
+        }
       }
       return recompensa;
     } catch (error) {
@@ -131,11 +144,17 @@ export class RecompensasService {
       if (!id) {
         throw new Error('El id es requerido');
       }
-      await this.prisma.recompensa.update({
+      const recompensa = await this.prisma.recompensa.findUnique({
+        where: { id },
+      });
+      if (!recompensa) {
+        throw new Error('Recompensa no encontrada');
+      }
+      const updatedRecompensa = await this.prisma.recompensa.update({
         where: { id },
         data: updateRecompensaDto,
       });
-      return { message: 'Recompensa actualizada correctamente' };
+      return updatedRecompensa;
     } catch (error) {
       throw new CustomError(
         error.message || 'Error al actualizar la recompensa',
@@ -148,6 +167,12 @@ export class RecompensasService {
     try {
       if (!id) {
         throw new Error('El id es requerido');
+      }
+      const recompensa = await this.prisma.recompensa.findUnique({
+        where: { id },
+      });
+      if (!recompensa) {
+        throw new Error('Recompensa no encontrada');
       }
       await this.prisma.recompensa.delete({
         where: { id },

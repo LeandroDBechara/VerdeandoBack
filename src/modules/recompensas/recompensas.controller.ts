@@ -36,6 +36,7 @@ export class RecompensasController {
         cantidad: { type: 'number', description: 'Cantidad de la recompensa', example: 100 },
         foto: { type: 'string', format: 'binary' },
       },
+      required: ['titulo', 'descripcion', 'puntos', 'cantidad', 'foto'],
     },
   })
   @UseInterceptors(

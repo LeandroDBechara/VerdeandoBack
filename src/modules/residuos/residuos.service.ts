@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateResiduoDto, UpdateResiduoDto } from './dto/create-residuo.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import CustomError from 'src/utils/custom.error';
+import CustomError from 'src/common/utils/custom.error';
 
 @Injectable()
 export class ResiduosService {
@@ -38,9 +38,13 @@ export class ResiduosService {
       if (!id) {
         throw new Error('El id es requerido');
       }
-      return await this.prisma.residuo.findUnique({
+      const residuo = await this.prisma.residuo.findUnique({
         where: { id },
       });
+      if (!residuo) {
+        throw new Error('El residuo no encontrado');
+      }
+      return residuo;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el residuo', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -51,10 +55,25 @@ export class ResiduosService {
       if (!id) {
         throw new Error('El id es requerido');
       }
-      return await this.prisma.residuo.update({
+      const residuo = await this.prisma.residuo.findUnique({
+        where: { id },
+      });
+      if (!residuo) {
+        throw new Error('El residuo no encontrado');
+      }
+      if (updateResiduoDto.material) {
+      const material = await this.prisma.residuo.findFirst({
+        where: { material: updateResiduoDto.material },
+      });
+        if (material) {
+          throw new Error('El material ya existe');
+        }
+      }
+      const updatedResiduo = await this.prisma.residuo.update({
         where: { id },
         data: updateResiduoDto,
       });
+      return updatedResiduo;
     } catch (error) {
       throw new CustomError(error.message || 'Error al actualizar el residuo', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -64,6 +83,12 @@ export class ResiduosService {
     try {
       if (!id) {
         throw new Error('El id es requerido');
+      }
+      const residuo = await this.prisma.residuo.findUnique({
+        where: { id },
+      });
+      if (!residuo) {
+        throw new Error('El residuo no encontrado');
       }
       await this.prisma.residuo.delete({
         where: { id },

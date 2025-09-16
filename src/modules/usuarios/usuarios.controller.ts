@@ -95,7 +95,7 @@ export class UsuariosController {
     schema: {
       type: 'object',
       properties: {
-        file: {
+        fotoPerfil: {
           type: 'string',
           format: 'binary',
           description: 'Archivo de imagen para la foto de perfil',
@@ -110,11 +110,11 @@ export class UsuariosController {
           description: 'Apellido del usuario',
           example: 'Pérez',
         },
-        fechaNacimiento: {
+        fechaDeNacimiento: {
           type: 'string',
           format: 'date',
           description: 'Fecha de nacimiento',
-          example: '2000-01-01',
+          example: '20-01-2001',
         },
         email: {
           type: 'string',
@@ -132,7 +132,15 @@ export class UsuariosController {
   })
   @Patch(':id')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('fotoPerfil', {
+      fileFilter: (req, file, cb) => {
+        if (file && /^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+        }
+      },
+      limits: { fileSize: 5 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, cb) => {
           const uploadPath = join(process.cwd(), 'img', 'usuarios');
@@ -147,25 +155,14 @@ export class UsuariosController {
           cb(null, `${uniqueSuffix}${fileExt}`);
         },
       }),
-      fileFilter: (req, file, cb) => {
-        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
-        }
-      },
-      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
-  update(@Param('id') id: string, @Body() body: any, @UploadedFile() file?: Express.Multer.File) {
-    // Filtrar el campo 'file' del body y crear el DTO
-    const { file: _, ...updateData } = body;
-    const updateUsuarioDto: UpdateUsuarioDto = updateData;
-
-    if (file) {
+  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFile() fotoPerfil?: Express.Multer.File) {
+    if (fotoPerfil) {
       // Servido como estático en /img
-      updateUsuarioDto.fotoPerfil = `/img/usuarios/${file.filename}` as any;
+      updateUsuarioDto.fotoPerfil = `/img/usuarios/${fotoPerfil.filename}`;
     }
+    console.log('controlador: ', updateUsuarioDto);
     return this.usuariosService.update(id, updateUsuarioDto);
   }
 
