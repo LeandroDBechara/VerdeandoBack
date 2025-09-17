@@ -137,7 +137,7 @@ export class AuthService {
       );
       
       if (!findUser) {
-        const message = 'Usuario no autorizado';
+        const message = 'Usuario o contraseña incorrecta';
         throw new CustomError(message,HttpStatus.UNAUTHORIZED);
       }
    
@@ -147,7 +147,7 @@ export class AuthService {
       );
 
       if (!isCorrectPassword) {
-        const message = 'Usuario no autorizado';
+        const message = 'Usuario  o contraseña incorrecta';
         throw new CustomError(message,HttpStatus.UNAUTHORIZED);
       }
 
