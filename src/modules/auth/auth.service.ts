@@ -193,7 +193,7 @@ export class AuthService {
       
 
       if(!findUser){
-        const message = 'Usuario no encontrado';
+        const message = 'El email no corresponde a ningun usuario';
         throw new CustomError(
          message,
           HttpStatus.NOT_FOUND, // 404
