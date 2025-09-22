@@ -24,8 +24,7 @@ export class MessagingService {
         <h2 style="color: #333333;">¡${welcomeMessage}!</h2>
         <p>Hola ${name},</p>
         <p>Bienvenido a la plataforma</p>
-       
-        <p>Bienvenido a la plataforma</p>
+        <img src="${process.env.URL_BACKEND}/img/logo-verdeando.png" alt="Verdeando" style="width: 100px; height: 100px;">
         <p>Gracias por registrarte</p>
     </div>
 </body>
