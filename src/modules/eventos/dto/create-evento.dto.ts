@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf } from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf, Length } from 'class-validator';
 import { transformDateString } from 'src/common/utils/date-transformer';
 
 export class CreateEventoDto {
@@ -105,7 +105,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsOptional({ message: 'El código es requerido' })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @MaxLength(8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  @Length(2, 8, { message: 'El código debe tener entre 2 y 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })

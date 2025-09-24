@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsJWT, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsJWT, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, MaxLength, Min, ValidateNested } from 'class-validator';
 
 export class CreateDetalleIntercambioDto {
   @ApiProperty({ description: 'Residue id', example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -27,7 +27,7 @@ export class CreateIntercambioDto {
   @ApiProperty({ description: 'Coupon code', example: '123456' })
   @IsString({ message: 'El código del cupón debe ser una cadena de texto' })
   @IsOptional({ message: 'El código del cupón es opcional' })
-  @Length(0, 6, { message: 'El código del cupón debe tener 6 caracteres' })
+  @Length(2, 8, { message: 'El código del cupón debe tener entre 2 y 8 caracteres' })
   codigoCupon?: string;
 
   @ApiProperty({ description: 'Detalles del intercambio', type: [CreateDetalleIntercambioDto] })
