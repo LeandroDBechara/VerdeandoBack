@@ -131,13 +131,7 @@ export class EventosService {
       });
       eventos.map((evento) => {
         if (evento.imagen) {
-          const fileName = evento.imagen.split('/').pop();
-          if (fileName) {
-            const path = join(process.cwd(), 'img', 'eventos', fileName);
-            if (existsSync(path)) {
-              evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
-            }
-          }
+          evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
         }
       });
       return eventos;
