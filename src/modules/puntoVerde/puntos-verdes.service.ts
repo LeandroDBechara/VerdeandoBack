@@ -31,6 +31,9 @@ export class PuntosVerdesService {
           imagen: imagen,
         },
       });
+      if (puntosVerde && puntosVerde.imagen) {
+        puntosVerde.imagen = `${process.env.URL_BACKEND}${puntosVerde.imagen}`;
+      }
       return puntosVerde;
     } catch (error) {
       if (createPuntosVerdeDto.imagen) {
@@ -60,13 +63,7 @@ export class PuntosVerdesService {
       });
       puntosVerdes.map((puntoVerde) => {
         if (puntoVerde.imagen) {
-          const fileName = puntoVerde.imagen.split('/').pop();
-          if (fileName) {
-            const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
-            if (existsSync(path)) {
-              puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-            }
-          }
+          puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
         }
       });
       return puntosVerdes;
@@ -92,14 +89,8 @@ export class PuntosVerdesService {
       if (!puntoVerde) {
         throw new Error('El punto verde no existe');
       }
-      if (puntoVerde.imagen) {
-        const fileName = puntoVerde.imagen.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
-          if (existsSync(path)) {
-            puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-          }
-        }
+      if (puntoVerde && puntoVerde.imagen) {
+        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
       }
       return puntoVerde;
     } catch (error) {
@@ -138,14 +129,8 @@ export class PuntosVerdesService {
       if (!puntoVerde) {
         throw new Error('El punto verde no existe o no pertenece al colaborador');
       }
-      if (puntoVerde.imagen) {
-        const fileName = puntoVerde.imagen.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'puntos-verdes', fileName);
-          if (existsSync(path)) {
-            puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-          }
-        }
+      if (puntoVerde && puntoVerde.imagen) {
+        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
       }
       return puntoVerde;
     } catch (error) {

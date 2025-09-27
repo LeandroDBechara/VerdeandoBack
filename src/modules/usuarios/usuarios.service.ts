@@ -41,6 +41,9 @@ export class UsuariosService {
           },
         },
       });
+      if (user && user.fotoPerfil) {
+        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
+      }
       return user;
     } catch (error) {
       throw new CustomError(error.message || 'Error al crear el usuario', error.status || HttpStatus.BAD_REQUEST);
@@ -143,14 +146,8 @@ export class UsuariosService {
         throw new Error('Usuarios no encontrados');
       }
       users.map((user) => {
-        if (user.fotoPerfil) {
-          const fileName = user.fotoPerfil.split('/').pop();
-          if (fileName) {
-            const path = join(process.cwd(), 'img', 'usuarios', fileName);
-            if (existsSync(path)) {
-              user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-            }
-          }
+        if (user && user.fotoPerfil) {
+          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
         }
       });
       return users;
@@ -168,15 +165,8 @@ export class UsuariosService {
       if (!user) {
         throw new Error('Usuario no encontrado');
       }
-      if (user.fotoPerfil) {
-        const fileName = user.fotoPerfil.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'usuarios', fileName);
-          console.log(path);
-          if (existsSync(path)) {
-            user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-          }
-        }
+      if (user && user.fotoPerfil) {
+        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
       }
       return { user };
     } catch (error) {
@@ -204,7 +194,7 @@ export class UsuariosService {
       });
 
       //eliminar la foto de perfil anterior si existe
-      if (updateUsuarioDto.fotoPerfil && userExists.fotoPerfil) {
+      if (updateUsuarioDto.fotoPerfil && userExists && userExists.fotoPerfil) {
         const fileName = userExists.fotoPerfil.split('/').pop();
         if (fileName) {
           const path = join(process.cwd(), 'img', 'usuarios', fileName);
@@ -214,15 +204,8 @@ export class UsuariosService {
         }
       }
 
-      if (user.fotoPerfil) {
-        const fileName = user.fotoPerfil.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'usuarios', fileName);
-          console.log(path);
-          if (existsSync(path)) {
-            user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-          }
-        }
+      if (user && user.fotoPerfil) {
+        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
       }
       return user;
     } catch (error) {

@@ -11,9 +11,13 @@ export class RecompensasService {
 
   async create(createRecompensaDto: CreateRecompensaDto) {
     try {
-      return await this.prisma.recompensa.create({
+      const recompensa = await this.prisma.recompensa.create({
         data: createRecompensaDto,
       });
+      if (recompensa && recompensa.foto) {
+        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
+      }
+      return recompensa;
     } catch (error) {
       if (createRecompensaDto.foto) {
         const fileName = createRecompensaDto.foto.split('/').pop();
@@ -76,13 +80,7 @@ export class RecompensasService {
       });
       recompensas.map((recompensa) => {
         if (recompensa.foto) {
-          const fileName = recompensa.foto.split('/').pop();
-          if (fileName) {
-            const path = join(process.cwd(), 'img', 'recompensas', fileName);
-            if (existsSync(path)) {
-              recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
-            }
-          }
+          recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
         }
       });
       return recompensas;
@@ -105,14 +103,8 @@ export class RecompensasService {
       if (!recompensa) {
         throw new Error('Recompensa no encontrada');
       }
-      if (recompensa.foto) {
-        const fileName = recompensa.foto.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'recompensas', fileName);
-          if (existsSync(path)) {
-            recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
-          }
-        }
+      if (recompensa && recompensa.foto) {
+        recompensa.foto = `${process.env.URL_BACKEND}${recompensa.foto}`;
       }
       return recompensa;
     } catch (error) {
@@ -154,6 +146,9 @@ export class RecompensasService {
         where: { id },
         data: updateRecompensaDto,
       });
+      if (updatedRecompensa && updatedRecompensa.foto) {
+        updatedRecompensa.foto = `${process.env.URL_BACKEND}${updatedRecompensa.foto}`;
+      }
       return updatedRecompensa;
     } catch (error) {
       throw new CustomError(

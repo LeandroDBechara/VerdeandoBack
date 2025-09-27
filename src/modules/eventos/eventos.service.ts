@@ -102,6 +102,9 @@ export class EventosService {
       if (evento.fechaInicio > new Date()) {
         throw new Error('El evento no ha comenzado');
       }
+      if (evento && evento.imagen) {
+        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
+      }
       return evento;
     } catch (error) {
       throw new CustomError(
@@ -142,7 +145,7 @@ export class EventosService {
 
   async findOne(id: string) {
     try {
-      return this.prisma.evento.findUnique({
+      const evento = await this.prisma.evento.findUnique({
         where: { id },
         select: {
           id: true,
@@ -155,6 +158,10 @@ export class EventosService {
           puntosVerdesPermitidos: true,
         },
       });
+      if (evento && evento.imagen) {
+        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
+      }
+      return evento;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el evento', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -189,7 +196,7 @@ export class EventosService {
         });
         updateEventoDto.puntosVerdesPermitidos = puntosVerdesPermitidos.map((puntoVerde) => puntoVerde.id);
       }
-      return this.prisma.evento.update({
+      const evento = await this.prisma.evento.update({
         where: { id },
         data: updateEventoDto,
         select: {
@@ -203,6 +210,10 @@ export class EventosService {
           puntosVerdesPermitidos: true,
         },
       });
+      if (evento && evento.imagen) {
+        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
+      }
+      return evento;
     } catch (error) {
       throw new CustomError(error.message || 'Error al actualizar el evento', error.status || HttpStatus.BAD_REQUEST);
     }
