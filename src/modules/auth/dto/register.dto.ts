@@ -30,7 +30,7 @@ export class RegisterUserDto {
 
   @ApiProperty({description: 'User birth date',example: '20-04-1996'})
   @IsNotEmpty({message: 'La fecha de nacimiento es requerida'})
-  @Transform(({ value }) => transformDateString(value, 'La fecha de nacimiento'))
+  @Transform(({ value }) => transformDateString(value, 'La fecha de nacimiento',0,0,0,0))
   @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
   fechaDeNacimiento: Date;
   

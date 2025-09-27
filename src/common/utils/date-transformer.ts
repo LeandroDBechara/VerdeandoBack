@@ -1,4 +1,4 @@
-export function transformDateString(value: any, fieldName: string): Date {
+export function transformDateString(value: any, fieldName: string,hour?: number, minute?: number, second?: number, millisecond?: number): Date {
     if (!value) return null as any; // or throw an error if null dates aren't allowed
     
     // Si ya es un objeto Date, retornarlo directamente
@@ -18,7 +18,16 @@ export function transformDateString(value: any, fieldName: string): Date {
       console.log( 'day: ', day);
       console.log( 'month: ', month);
       console.log( 'year: ', year);
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+      const now = new Date();
+      const date = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        hour || now.getHours(),
+        minute || now.getMinutes(),
+        second || now.getSeconds(),
+        millisecond || now.getMilliseconds(),
+      );
       if (isNaN(date.getTime())) {
         throw new Error(`${fieldName} debe ser una fecha válida`);
       }

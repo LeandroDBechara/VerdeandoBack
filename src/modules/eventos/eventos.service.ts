@@ -24,8 +24,8 @@ export class EventosService {
         throw new Error('La fecha de fin debe ser mayor a la fecha de inicio');
       }
 
-      if (createEventoDto.fechaInicio < new Date() || createEventoDto.fechaFin < new Date()) {
-        throw new Error('La fecha de inicio y fin deben ser mayor a la fecha actual');
+      if (createEventoDto.fechaFin < new Date()) {
+        throw new Error('La fecha de fin debe ser mayor a la fecha actual');
       }
 
       if (

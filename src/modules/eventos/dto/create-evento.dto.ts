@@ -9,6 +9,7 @@ export class CreateEventoDto {
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1).toLowerCase())
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
@@ -16,6 +17,7 @@ export class CreateEventoDto {
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1).toLowerCase())
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -24,7 +26,7 @@ export class CreateEventoDto {
   imagen?: string ;
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
-  @Transform(({ value }) => transformDateString(value, 'La fecha de inicio'))
+  @Transform(({ value }) => transformDateString(value, 'La fecha de inicio',0,0,0,0))
   @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida' })
   fechaInicio: Date;
@@ -32,7 +34,7 @@ export class CreateEventoDto {
 
   @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
   @IsNotEmpty({ message: 'La fecha de fin es requerida' })
-  @Transform(({ value }) => transformDateString(value, 'La fecha de fin'))
+  @Transform(({ value }) => transformDateString(value, 'La fecha de fin',0,0,0,0))
   @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
   fechaFin: Date;
 
@@ -74,6 +76,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase())
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
@@ -81,6 +84,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase())
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -90,14 +94,14 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
   @IsOptional({ message: 'La fecha de inicio es requerida' })
-  @Transform(({ value }) => transformDateString(value, 'La fecha de inicio'))
+  @Transform(({ value }) => transformDateString(value, 'La fecha de inicio',0,0,0,0))
   @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
   fechaInicio: Date;
 
 
   @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
   @IsOptional({ message: 'La fecha de fin es requerida' })
-  @Transform(({ value }) => transformDateString(value, 'La fecha de fin'))
+  @Transform(({ value }) => transformDateString(value, 'La fecha de fin',0,0,0,0))
   @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
   fechaFin: Date;
 

@@ -121,7 +121,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     @IsOptional()
     @Transform(({ value }) => {
       if (!value || value === ''){ return undefined; }
-      return transformDateString(value, 'La fecha de nacimiento');
+      return transformDateString(value, 'La fecha de nacimiento',0,0,0,0);
     })
     @IsDate({message: 'La fecha de nacimiento debe ser una fecha válida'})
     fechaDeNacimiento?:Date;
