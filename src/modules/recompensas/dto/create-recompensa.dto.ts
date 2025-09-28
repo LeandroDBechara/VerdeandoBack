@@ -1,20 +1,21 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Length, Min, ValidateIf } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { UpperCaseTransformer } from 'src/common/utils/UpperCaseTransformer';
 
 export class CreateRecompensaDto {
   @ApiProperty({ description: 'Titulo', example: 'Recompensa 1' })
   @IsNotEmpty({ message: 'El titulo es requerido' })
   @IsString({ message: 'El titulo debe ser una cadena de texto' })
   @Length(2, 100, { message: 'El titulo debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   titulo: string;
 
   @ApiProperty({ description: 'Descripción', example: 'Recompensa 1' })
   @IsNotEmpty({ message: 'La descripción es requerida' })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @Length(2, 500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion: string;
 
   @ApiProperty({ description: 'Puntos', example: 100 })
@@ -70,7 +71,7 @@ export class UpdateRecompensaDto extends PartialType(CreateRecompensaDto) {
   })
   @IsString({ message: 'El titulo debe ser una cadena de texto' })
   @Length(2, 100, { message: 'El titulo debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   titulo: string;
 
   @ApiProperty({ description: 'Descripción', example: 'Recompensa 1' })
@@ -81,7 +82,7 @@ export class UpdateRecompensaDto extends PartialType(CreateRecompensaDto) {
   })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @Length(2, 500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion: string;
 
   @ApiProperty({ description: 'Puntos', example: 100 })

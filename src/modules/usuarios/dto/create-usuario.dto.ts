@@ -5,6 +5,7 @@ import { Transform } from "class-transformer";
 import { IsString, IsNotEmpty, IsDate, IsEmail, IsEnum, Length, MinLength, Matches, Validate, IsUrl, IsOptional, ValidateIf, IsBase64} from "class-validator";
 import { ValidarCuit } from "src/common/utils/cuitValidation";
 import { transformDateString } from "src/common/utils/date-transformer";
+import { UpperCaseTransformer } from "src/common/utils/UpperCaseTransformer";
 
 
 export class CreateUsuarioDto {
@@ -93,12 +94,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     })
     @IsString({message: 'El nombre debe ser una cadena de caracteres'})
     @Length(2, 40, { message: 'El nombre debe tener entre 2 y 40 caracteres' })
-    @Transform(({ value }) => {
-      if (typeof value !== 'string') return value;
-      const trimmed = value.trim();
-      if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
-    })
+    @Transform(UpperCaseTransformer)
     nombre?:string;
 
     @ApiProperty({ description: 'Apellido', example: 'Perez', required: false })
@@ -109,12 +105,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     })
     @IsString({message: 'El apellido debe ser una cadena de caracteres'})
     @Length(2, 40, { message: 'El apellido debe tener entre 2 y 40 caracteres' })
-    @Transform(({ value }) => {
-      if (typeof value !== 'string') return value;
-      const trimmed = value.trim();
-      if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
-    })
+    @Transform(UpperCaseTransformer)
     apellido?:string;
     
     @ApiProperty({ description: 'Fecha de nacimiento', example: '01-01-2000', required: false })
@@ -168,7 +159,7 @@ export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {
   @IsOptional()
   @IsNotEmpty({message: 'El domicilio fiscal es requerido'})
   @IsString({message: 'El domicilio fiscal debe ser una cadena de caracteres'})
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   domicilioFiscal:string;
 
   @ApiProperty({ description: 'CUIT/CUIL', example: '20-30123456-7' })   

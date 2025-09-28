@@ -1,6 +1,7 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {IsString, IsNotEmpty, IsNumber, Max, Min, Length, IsUUID, IsArray, ValidateIf, IsOptional} from 'class-validator';
 import { Transform } from 'class-transformer';
+import { UpperCaseTransformer } from 'src/common/utils/UpperCaseTransformer';
 
 export class CreatePuntosVerdeDto {
   @ApiProperty({ description: 'Latitud', example: 10.0 })
@@ -33,21 +34,21 @@ export class CreatePuntosVerdeDto {
   @IsNotEmpty({ message: 'La dirección es requerida' })
   @IsString({ message: 'La dirección debe ser una cadena de texto' })
   @Length(3, 100, { message: 'La dirección debe tener entre 3 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   direccion: string;
 
   @ApiProperty({ description: 'Nombre', example: 'Punto Verde' })
   @IsNotEmpty({ message: 'El nombre es requerido' })
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
   @Length(2, 100, { message: 'El nombre debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   nombre: string;
 
   @ApiProperty({ description: 'Descripción', example: 'Punto Verde' })
   @IsOptional({ message: 'La descripción es requerida' })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @Length(2, 500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion?: string;
 
   @ApiProperty({ description: 'Imagen' })
@@ -59,7 +60,7 @@ export class CreatePuntosVerdeDto {
   @IsNotEmpty({ message: 'Los días de atención son requeridos' })
   @IsString({ message: 'Los días de atención deben ser una cadena de texto' })
   @Length(3, 500, { message: 'Los días de atención deben tener entre 3 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   diasHorarioAtencion: string;
 
   @ApiProperty({ description: 'Colaborador id', example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -125,7 +126,7 @@ export class UpdatePuntosVerdeDto extends PartialType(CreatePuntosVerdeDto) {
   })
   @IsString({ message: 'La dirección debe ser una cadena de texto' })
   @Length(3, 100, { message: 'La dirección debe tener entre 3 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   direccion: string;
 
   @ApiProperty({ description: 'Nombre', example: 'Punto Verde' })
@@ -136,14 +137,14 @@ export class UpdatePuntosVerdeDto extends PartialType(CreatePuntosVerdeDto) {
   })
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
   @Length(2, 100, { message: 'El nombre debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   nombre: string;
 
   @ApiProperty({ description: 'Descripción', example: 'Punto Verde' })
   @IsOptional({ message: 'La descripción es requerida' })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @Length(2, 500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion?: string;
 
   @ApiProperty({ description: 'Imagen' })
@@ -159,7 +160,7 @@ export class UpdatePuntosVerdeDto extends PartialType(CreatePuntosVerdeDto) {
   })
   @IsString({ message: 'Los días de atención deben ser una cadena de texto' })
   @Length(3, 500, { message: 'Los días de atención deben tener entre 3 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   diasHorarioAtencion: string;
 
   @ApiProperty({ description: 'Colaborador id', example: '123e4567-e89b-12d3-a456-426614174000' })

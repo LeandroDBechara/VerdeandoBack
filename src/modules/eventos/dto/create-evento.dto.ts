@@ -2,6 +2,7 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsArray, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength, ValidateIf, Length } from 'class-validator';
 import { transformDateString } from 'src/common/utils/date-transformer';
+import { UpperCaseTransformer } from 'src/common/utils/UpperCaseTransformer';
 
 export class CreateEventoDto {
   @ApiProperty({ description: 'Título del evento', example: 'Evento de prueba' })
@@ -9,7 +10,7 @@ export class CreateEventoDto {
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
@@ -17,7 +18,7 @@ export class CreateEventoDto {
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -81,7 +82,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
@@ -93,7 +94,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
+  @Transform(UpperCaseTransformer)
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
