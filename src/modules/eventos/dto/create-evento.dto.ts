@@ -9,7 +9,7 @@ export class CreateEventoDto {
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1).toLowerCase())
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
@@ -17,7 +17,7 @@ export class CreateEventoDto {
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1).toLowerCase())
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -71,29 +71,46 @@ export class CreateEventoDto {
 }
 
 export class UpdateEventoDto extends PartialType(CreateEventoDto) {
+
   @ApiProperty({ description: 'Título del evento', example: 'Evento de prueba' })
   @IsOptional({ message: 'El título es requerido' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @IsString({ message: 'El título debe ser una cadena de texto' })
   @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
   @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase())
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
   @IsOptional({ message: 'La descripción es requerida' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
   @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
   @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase())
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
   @IsOptional({ message: 'La imagen es requerida' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @ValidateIf((o) => o.imagen && o.imagen.trim() !== '', { message: 'La imagen es requerida' })
   imagen?: string ;
 
   @ApiProperty({ description: 'Fecha de inicio del evento', example: '01-01-2025' })
   @IsOptional({ message: 'La fecha de inicio es requerida' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @Transform(({ value }) => transformDateString(value, 'La fecha de inicio',0,0,0,0))
   @IsDate({ message: 'La fecha de inicio debe ser una fecha válida' })
   fechaInicio: Date;
@@ -101,6 +118,10 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
 
   @ApiProperty({ description: 'Fecha de fin del evento', example: '01-01-2025' })
   @IsOptional({ message: 'La fecha de fin es requerida' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @Transform(({ value }) => transformDateString(value, 'La fecha de fin',0,0,0,0))
   @IsDate({ message: 'La fecha de fin debe ser una fecha válida' })
   fechaFin: Date;
@@ -108,6 +129,10 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
 
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsOptional({ message: 'El código es requerido' })
+  @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
   @IsString({ message: 'El código debe ser una cadena de texto' })
   @Length(2, 8, { message: 'El código debe tener entre 2 y 8 caracteres' })
   codigo?: string;
@@ -115,12 +140,15 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
   @IsOptional({ message: 'El multiplicador es requerido' })
   @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
+  @Transform(({ value }) => {
     if (typeof value === 'string') {
       return parseFloat(value);
     }
     return value;
   })
-  @IsOptional({ message: 'El multiplicador es requerido' })
   @IsNumber({}, { message: 'El multiplicador debe ser un número' })
   @Min(1.0, { message: 'El multiplicador debe ser mayor a 1.0' })
   multiplicador?: number;
@@ -128,12 +156,15 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @ApiProperty({ description: 'Punto verde', example: ['123e4567-e89b-12d3-a456-426614174000'] })
   @IsOptional({ message: 'El punto verde es requerido' })
   @Transform(({ value }) => {
+    if (!value || value === '') { return undefined; }
+    return value;
+  })
+  @Transform(({ value }) => {
     if (typeof value === 'string') {
       return value.split(',');
     }
     return value;
   })
   @IsArray({ message: 'El punto verde debe ser un array' })
-  @IsOptional({ message: 'El punto verde es requerido' })
   puntosVerdesPermitidos?: string[];
 }

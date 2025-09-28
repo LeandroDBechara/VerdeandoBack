@@ -127,7 +127,6 @@ export class EventosController {
           example: ['123456'],
         },
       },
-      required: ['titulo', 'descripcion', 'fechaInicio', 'fechaFin', 'codigo', 'multiplicador'],
     },
   })
   @UseInterceptors(
@@ -158,7 +157,10 @@ export class EventosController {
   )
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventoDto: UpdateEventoDto) {
+  update(@Param('id') id: string, @Body() updateEventoDto: UpdateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
+    if (imagen) {
+      updateEventoDto.imagen = `/img/eventos/${imagen.filename}`;
+    }
     return this.eventosService.update(id, updateEventoDto);
   }
   @ApiCustomOperation({

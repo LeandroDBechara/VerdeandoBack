@@ -121,13 +121,54 @@ export class RecompensasController {
 
   @ApiCustomOperation({
     summary: 'Actualizar una recompensa por id',
-    bodyType: CreateRecompensaDto,
     responseStatus: 200,
     responseDescription: 'Recompensa actualizada correctamente',
   })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        titulo: { type: 'string', description: 'Titulo de la recompensa', example: 'Recompensa 1' },
+        descripcion: { type: 'string', description: 'Descripción de la recompensa', example: 'Recompensa 1' },
+        puntos: { type: 'number', description: 'Puntos de la recompensa', example: 100 },
+        cantidad: { type: 'number', description: 'Cantidad de la recompensa', example: 100 },
+        foto: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('foto', {
+      fileFilter: (req, file, cb) => {
+        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+        }
+      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'img', 'recompensas');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExt = extname(file.originalname);
+          cb(null, `${uniqueSuffix}${fileExt}`);
+        },
+      }),
+    }),
+  )
   @Patch(':id')
   @Roles(RoleEnum.ADMIN)
-  update(@Param('id') id: string, @Body() updateRecompensaDto: UpdateRecompensaDto) {
+  update(@Param('id') id: string, @Body() updateRecompensaDto: UpdateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
+    if (foto) {
+      updateRecompensaDto.foto = `/img/recompensas/${foto.filename}`;
+    }
     return this.recompensasService.update(id, updateRecompensaDto);
   }
 

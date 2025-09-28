@@ -115,17 +115,77 @@ export class PuntosVerdesController {
 
   @ApiCustomOperation({
     summary: 'Actualizar un punto verde por id',
-    bodyType: CreatePuntosVerdeDto,
     responseStatus: 200,
     responseDescription: 'Punto verde actualizado correctamente',
   })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imagen: { type: 'string', format: 'binary' },
+        nombre: { type: 'string', description: 'Nombre del punto verde', example: 'Punto Verde 1' },
+        descripcion: { type: 'string', description: 'Descripción del punto verde', example: 'Punto Verde 1' },
+        direccion: { type: 'string', description: 'Dirección del punto verde', example: 'Calle 123, Ciudad' },
+        latitud: { type: 'number', description: 'Latitud del punto verde', example: 10.0 },
+        longitud: { type: 'number', description: 'Longitud del punto verde', example: 10.0 },
+        diasHorarioAtencion: {
+          type: 'string',
+          description: 'Horarios de atención del punto verde',
+          example: 'Lunes a Viernes 09:00 - 18:00 \n Sabado 09:00 - 13:00',
+        },
+        colaboradorId: {
+          type: 'string',
+          description: 'ID del colaborador',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
+        residuosAceptados: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Materiales aceptados del punto verde',
+          example: ['Plástico', 'Vidrio'],
+        },
+      },
+    },
+  })
+  @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('imagen', {
+      fileFilter: (req, file, cb) => {
+        if (/^image\/(png|jpe?g|webp|gif)$/i.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Tipo de archivo no permitido. Solo imágenes.'), false);
+        }
+      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'img', 'puntos-verdes');
+          if (!existsSync(uploadPath)) {
+            mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const fileExt = extname(file.originalname);
+          cb(null, `${uniqueSuffix}${fileExt}`);
+        },
+      }),
+    }),
+  )
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Patch(':id/:colaboradorId')
   update(
     @Param('id') id: string,
     @Param('colaboradorId') colaboradorId: string,
     @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto,
+    @UploadedFile() imagen: Express.Multer.File,
   ) {
+    if (imagen) {
+      updatePuntosVerdeDto.imagen = `/img/puntos-verdes/${imagen.filename}`;
+    }
     return this.puntosVerdesService.update(id, colaboradorId, updatePuntosVerdeDto);
   }
 

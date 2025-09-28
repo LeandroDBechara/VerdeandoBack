@@ -16,7 +16,7 @@ export class CreateUsuarioDto {
       if (typeof value !== 'string') return value;
       const trimmed = value.trim();
       if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1).toLowerCase();
+      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
     })
     nombre:string;
 
@@ -28,7 +28,7 @@ export class CreateUsuarioDto {
       if (typeof value !== 'string') return value;
       const trimmed = value.trim();
       if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1).toLowerCase();
+      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
     })
     apellido:string;
     
@@ -97,7 +97,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
       if (typeof value !== 'string') return value;
       const trimmed = value.trim();
       if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1).toLowerCase();
+      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
     })
     nombre?:string;
 
@@ -113,7 +113,7 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
       if (typeof value !== 'string') return value;
       const trimmed = value.trim();
       if (trimmed.length === 0) return trimmed;
-      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1).toLowerCase();
+      return trimmed.slice(0, 1).toUpperCase() + trimmed.slice(1);
     })
     apellido?:string;
     
@@ -168,6 +168,7 @@ export class UpdateColaboradorDto extends PartialType(CreateColaboradorDto) {
   @IsOptional()
   @IsNotEmpty({message: 'El domicilio fiscal es requerido'})
   @IsString({message: 'El domicilio fiscal debe ser una cadena de caracteres'})
+  @Transform(({ value }) => value.trim().slice(0, 1).toUpperCase() + value.trim().slice(1))
   domicilioFiscal:string;
 
   @ApiProperty({ description: 'CUIT/CUIL', example: '20-30123456-7' })   
