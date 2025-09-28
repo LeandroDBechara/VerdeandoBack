@@ -135,7 +135,7 @@ export class IntercambiosService {
         if (!evento) {
           throw new NotFoundException('Evento no encontrado');
         }
-        if (!evento.puntosVerdesPermitidos.includes(puntoVerdeId)) {
+        if (!evento.puntosVerdesPermitidos.includes(puntoVerdeId) && evento.puntosVerdesPermitidos.length > 1) {
           throw new NotFoundException('Punto Verde no permitido para este evento');
         }
         if (evento.fechaFin < new Date()) {
