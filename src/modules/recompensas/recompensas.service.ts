@@ -120,12 +120,18 @@ export class RecompensasService {
       if (!usuarioId) {
         throw new Error('El id del usuario es requerido');
       }
-      return await this.prisma.canje.findMany({
+      const canjes = await this.prisma.canje.findMany({
         where: { usuarioId, isDeleted: false },
         include: {
           recompensa: true,
         },
       });
+      canjes.map((canje) => {
+        if (canje.recompensa && canje.recompensa.foto) {
+          canje.recompensa.foto = `${process.env.URL_BACKEND}${canje.recompensa.foto}`;
+        }
+      });
+      return canjes;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener los canjes', error.status || HttpStatus.BAD_REQUEST);
     }
