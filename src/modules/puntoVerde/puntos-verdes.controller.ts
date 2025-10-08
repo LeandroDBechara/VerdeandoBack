@@ -13,8 +13,7 @@ import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
+
 @ApiTags('Puntos Verdes')
 @Controller('puntos-verdes')
 export class PuntosVerdesController {
@@ -56,6 +55,9 @@ export class PuntosVerdesController {
       required: ['imagen', 'nombre', 'direccion', 'latitud', 'longitud', 'diasHorarioAtencion', 'colaboradorId', 'residuosAceptados'],
     },
   })
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @UseInterceptors(
     FileInterceptor('imagen', {
@@ -96,7 +98,6 @@ export class PuntosVerdesController {
     responseStatus: 200,
     responseDescription: 'Puntos verdes obtenidos correctamente',
   })
-  @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN, RoleEnum.USUARIO)
   @Get()
   findAll() {
     return this.puntosVerdesService.findAll();
@@ -107,6 +108,8 @@ export class PuntosVerdesController {
     responseStatus: 200,
     responseDescription: 'Punto verde obtenido correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN, RoleEnum.USUARIO)
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -148,7 +151,6 @@ export class PuntosVerdesController {
       },
     },
   })
-  @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @UseInterceptors(
     FileInterceptor('imagen', {
       fileFilter: (req, file, cb) => {
@@ -175,14 +177,11 @@ export class PuntosVerdesController {
       }),
     }),
   )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Patch(':id/:colaboradorId')
-  update(
-    @Param('id') id: string,
-    @Param('colaboradorId') colaboradorId: string,
-    @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto,
-    @UploadedFile() imagen: Express.Multer.File,
-  ) {
+  update( @Param('id') id: string, @Param('colaboradorId') colaboradorId: string, @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto, @UploadedFile() imagen: Express.Multer.File,) {
     if (imagen) {
       updatePuntosVerdeDto.imagen = `/img/puntos-verdes/${imagen.filename}`;
     }
@@ -194,7 +193,9 @@ export class PuntosVerdesController {
     responseStatus: 200,
     responseDescription: 'Punto verde eliminado correctamente',
   })
-  @Roles(RoleEnum.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR)
   @Delete(':id/:colaboradorId')
   remove(@Param('id') id: string, @Param('colaboradorId') colaboradorId: string) {
     return this.puntosVerdesService.remove(id, colaboradorId);

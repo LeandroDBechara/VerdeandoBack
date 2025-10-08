@@ -9,8 +9,6 @@ import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 
 @ApiTags('Residuos')
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
 @Controller('residuos')
 export class ResiduosController {
   constructor(private readonly residuosService: ResiduosService) {}
@@ -21,6 +19,8 @@ export class ResiduosController {
     responseStatus: 200,
     responseDescription: 'Residuo creado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Post()
   create(@Body() createResiduoDto: CreateResiduoDto) {
@@ -32,7 +32,6 @@ export class ResiduosController {
     responseStatus: 200,
     responseDescription: 'Residuos obtenidos correctamente',
   })
-  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   @Get()
   findAll() {
     return this.residuosService.findAll();
@@ -43,7 +42,6 @@ export class ResiduosController {
     responseStatus: 200,
     responseDescription: 'Residuo obtenido correctamente',
   })
-  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.residuosService.findOne(id);
@@ -55,6 +53,8 @@ export class ResiduosController {
     responseStatus: 200,
     responseDescription: 'Residuo actualizado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateResiduoDto: UpdateResiduoDto) {
@@ -66,6 +66,8 @@ export class ResiduosController {
     responseStatus: 200,
     responseDescription: 'Residuo eliminado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {

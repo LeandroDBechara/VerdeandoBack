@@ -9,12 +9,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(ConfigService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      expiration: ConfigService.get<string>('JWT_EXPIRES_IN'),
       ignoreExpiration: false,
       secretOrKey: ConfigService.get<string>('JWT_SECRET_KEY'),
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
+
   async validate(payload: JwtPayload) {
     return { userId: payload.id, email: payload.email, role: payload.role };
   }

@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, UseGuards} from '@nestjs/common';
 import { RecompensasService } from './recompensas.service';
 import { CreateCanjeDto, CreateRecompensaDto, UpdateRecompensaDto } from './dto/create-recompensa.dto';
 import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
@@ -14,8 +14,8 @@ import { existsSync, mkdirSync } from 'fs';
 import { extname } from 'path';
 
 @ApiTags('Recompensas')
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
+
+
 @Controller('recompensas')
 export class RecompensasController {
   constructor(private readonly recompensasService: RecompensasService) {}
@@ -65,6 +65,8 @@ export class RecompensasController {
       }),
     }),
   )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Post()
   create(@Body() createRecompensaDto: CreateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
@@ -80,6 +82,8 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Canje creado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Post('canje')
   createCanje(@Body() createCanjeDto: CreateCanjeDto) {
@@ -91,7 +95,6 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Recompensas obtenidas correctamente',
   })
-  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   @Get()
   findAll() {
     return this.recompensasService.findAll();
@@ -102,7 +105,6 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Recompensa obtenida correctamente',
   })
-  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.recompensasService.findOne(id);
@@ -113,6 +115,8 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Canjes obtenidos correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   @Get('canjes/:usuarioId')
   findAllCanjesOnUser(@Param('usuarioId') usuarioId: string) {
@@ -163,8 +167,10 @@ export class RecompensasController {
       }),
     }),
   )
-  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateRecompensaDto: UpdateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
     if (foto) {
       updateRecompensaDto.foto = `/img/recompensas/${foto.filename}`;
@@ -177,8 +183,10 @@ export class RecompensasController {
     responseStatus: 200,
     responseDescription: 'Recompensa eliminada correctamente',
   })
-  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
+  @Delete(':id')
   remove(@Param('id') id: string) {
     return this.recompensasService.remove(id);
   }

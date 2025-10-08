@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Headers} from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import {
   CreateColaboradorDto,
@@ -18,10 +18,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import { Juego } from '@prisma/client';
 
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
+
 @ApiTags('Usuarios')
 @Controller('usuarios')
 export class UsuariosController {
@@ -34,6 +32,8 @@ export class UsuariosController {
     responseDescription: 'Usuario creado correctamente',
   })
   @Post('/register')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuariosService.create(createUsuarioDto);
@@ -46,7 +46,9 @@ export class UsuariosController {
     responseDescription: 'Colaborador creado correctamente',
   })
   @Post('/colaborador')
-  @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   createColaborador(@Body() createColaboradorDto: CreateColaboradorDto) {
     return this.usuariosService.serColaborador(createColaboradorDto);
   }
@@ -58,7 +60,9 @@ export class UsuariosController {
     responseDescription: 'Colaborador actualizado correctamente',
   })
   @Patch('/colaborador/:id')
-  @Roles(RoleEnum.USUARIO, RoleEnum.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   updateColaborador(@Param('id') id: string, @Body() updateColaboradorDto: UpdateColaboradorDto) {
     return this.usuariosService.updateColaborador(id, updateColaboradorDto);
   }
@@ -69,6 +73,8 @@ export class UsuariosController {
     responseDescription: 'Usuarios obtenidos correctamente',
   })
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   findAll() {
     return this.usuariosService.findAll();
@@ -80,9 +86,8 @@ export class UsuariosController {
     responseDescription: 'Usuario obtenido correctamente',
   })
   @Get(':id')
-  @Roles(RoleEnum.ADMIN)
-  findOne(@Param('id') id: string) {
-    return this.usuariosService.findOne(id);
+  findOne(@Param('id') id: string, @Headers('authorization') authorization?: string) {
+    return this.usuariosService.findOne(id, authorization);
   }
 
   @ApiCustomOperation({
@@ -157,6 +162,9 @@ export class UsuariosController {
       }),
     }),
   )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR)
   update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFile() fotoPerfil?: Express.Multer.File) {
     if (fotoPerfil) {
       // Servido como estático en /img
@@ -172,6 +180,8 @@ export class UsuariosController {
     responseDescription: 'Usuario eliminado correctamente',
   })
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   remove(@Param('id') id: string) {
     return this.usuariosService.remove(id);
@@ -184,7 +194,7 @@ export class UsuariosController {
     responseDescription: 'Juego guardado correctamente',
   })
   @Post('/guardar-juego')
-  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
+  
   guardarJuego(@Body() guardarJuegoDto: GuardarJuegoDto) {
     return this.usuariosService.guardarJuego(guardarJuegoDto);
   }
@@ -196,7 +206,6 @@ export class UsuariosController {
     responseDescription: 'Juego cargado correctamente',
   })
   @Get('/cargar-juego')
-  @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   cargarJuego(@Body() cargarJuegoDto: CargarJuegoDto) {
     return this.usuariosService.cargarJuego(cargarJuegoDto);
   }

@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, UseGuards} from '@nestjs/common';
 import { EventosService } from './eventos.service';
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -12,8 +12,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
+
 @ApiTags('Eventos')
 @Controller('eventos')
 export class EventosController {
@@ -72,6 +71,8 @@ export class EventosController {
       }),
     }),
   )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Post()
   create(@Body() createEventoDto: CreateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
@@ -86,7 +87,6 @@ export class EventosController {
     responseStatus: 200,
     responseDescription: 'Eventos obtenidos correctamente',
   })
-  @Roles(RoleEnum.ADMIN, RoleEnum.USUARIO, RoleEnum.COLABORADOR)
   @Get()
   findAll() {
     return this.eventosService.findAll();
@@ -97,7 +97,6 @@ export class EventosController {
     responseStatus: 200,
     responseDescription: 'Evento obtenido correctamente',
   })
-  @Roles(RoleEnum.ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.eventosService.findOne(id);
@@ -155,6 +154,8 @@ export class EventosController {
       }),
     }),
   )
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEventoDto: UpdateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
@@ -168,6 +169,8 @@ export class EventosController {
     responseStatus: 200,
     responseDescription: 'Evento eliminado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {

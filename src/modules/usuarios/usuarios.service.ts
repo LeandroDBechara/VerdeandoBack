@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {CargarJuegoDto, CreateColaboradorDto, CreateUsuarioDto, GuardarJuegoDto, UpdateColaboradorDto, UpdateUsuarioDto} from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
@@ -8,7 +9,7 @@ import CustomError from 'src/common/utils/custom.error';
 
 @Injectable()
 export class UsuariosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService) {}
 
   async create(newUser: CreateUsuarioDto) {
     try {
@@ -76,12 +77,15 @@ export class UsuariosService {
           usuarioId: true,
         },
       });
+      
+      if(usuario.rol != Role.ADMIN) {
       await this.prisma.usuario.update({
         where: { id: createColaboradorDto.usuarioId },
         data: {
           rol: Role.COLABORADOR,
         },
       });
+      }
       //ver si enviar el colaborador o un mensaje
       return colaborador;
     } catch (error) {
@@ -156,7 +160,7 @@ export class UsuariosService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, authorizationHeader?: string) {
     try {
       const user = await this.prisma.usuario.findUnique({
         where: { id, isDeleted: false },
@@ -168,7 +172,31 @@ export class UsuariosService {
       if (user && user.fotoPerfil) {
         user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
       }
-      return { user };
+      // Verificar expiración del token y refrescar si corresponde
+      let newAccessToken: string | undefined;
+      try {
+        const token = authorizationHeader?.startsWith('Bearer ')
+          ? authorizationHeader.split(' ')[1]
+          : undefined;
+        if (token) {
+          const decoded: any = this.jwtService.decode(token);
+          const expMs = decoded?.exp ? decoded.exp * 1000 : undefined;
+          const isExpired = expMs ? Date.now() >= expMs : false;
+          // También podemos refrescar si está por expirar en menos de 5 minutos
+          const isNearExpiry = expMs ? expMs - Date.now() < 5 * 60 * 1000 : false;
+          if (isExpired || isNearExpiry) {
+            const payload = { id: user.id, email: user.email, role: user.rol };
+            const { accessToken } = await (await import('src/common/utils/encryption')).createTokens(
+              payload,
+              this.jwtService,
+            );
+            newAccessToken = accessToken;
+          }
+        }
+      } catch (err) {
+        // Si falla la decodificación/verificación, no bloquear la respuesta del usuario
+      }
+      return newAccessToken ? { user, token: newAccessToken } : { user };
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el usuario', error.status || HttpStatus.BAD_REQUEST);
     }

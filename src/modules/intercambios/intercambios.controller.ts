@@ -8,8 +8,7 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 
-//@UseGuards(JwtAuthGuard, RolesGuard)
-//@ApiBearerAuth('access-token')
+
 @ApiTags('Intercambios')
 @Controller('intercambios')
 export class IntercambiosController {
@@ -21,6 +20,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambio creado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Post()
   async create(@Body() createIntercambioDto: CreateIntercambioDto) {
@@ -33,6 +34,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambio confirmado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Post('confirmar')
   async confirmarIntercambio(@Body() confirmarIntercambioDto: ConfirmarIntercambioDto) {
@@ -44,6 +47,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambios obtenidos correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Get()
   findAll() {
@@ -55,6 +60,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambios obtenidos correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Get('usuario/:id')
   findAllByUsuarioId(@Param('id') id: string) {
@@ -66,6 +73,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambio obtenido correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -78,6 +87,8 @@ export class IntercambiosController {
     responseStatus: 200,
     responseDescription: 'Intercambio actualizado correctamente',
   })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateIntercambioDto: UpdateIntercambioDto) {
@@ -88,7 +99,9 @@ export class IntercambiosController {
     summary: 'Eliminar un intercambio',
     responseStatus: 200,
     responseDescription: 'Intercambio eliminado correctamente',
-  })
+  })  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
