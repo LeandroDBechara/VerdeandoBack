@@ -268,14 +268,14 @@ export class UsuariosService {
 
   async guardarJuego(guardarJuegoDto: GuardarJuegoDto) {
     try {
-      const { juego, nombre, datosDeGuardado, usuarioId } = guardarJuegoDto;
-      if (!juego || !nombre || !datosDeGuardado || !usuarioId) {
+      const { nombre, datosDeGuardado, usuarioId } = guardarJuegoDto;
+      if (!nombre || !datosDeGuardado || !usuarioId) {
         throw new Error('El juego, nombre, datosDeGuardado y usuarioId son requeridos');
       }
       const guardado = await this.prisma.guardado.create({
-        data: { juego, nombre, datosDeGuardado, usuarioId },
+        data: { nombre, datosDeGuardado, usuarioId },
       });
-      return guardado;
+      return { message: 'Juego guardado correctamente' };
     } catch (error) {
       throw new CustomError(error.message || 'Error al guardar el juego', error.status || HttpStatus.BAD_REQUEST);
     }
@@ -283,11 +283,11 @@ export class UsuariosService {
 
   async cargarJuego(cargarJuegoDto: CargarJuegoDto) {
     try { 
-      const { juego, usuarioId } = cargarJuegoDto;
-      if (!juego || !usuarioId) {
+      const { nombre, usuarioId } = cargarJuegoDto;
+      if (!nombre || !usuarioId) {
         throw new Error('El id y el usuarioId son requeridos');
       }
-      const guardado = await this.prisma.guardado.findFirst({ where: { juego, usuarioId } });
+      const guardado = await this.prisma.guardado.findFirst({ where: { nombre, usuarioId } });
       if (!guardado) {
         throw new Error('Guardado no encontrado');
       }

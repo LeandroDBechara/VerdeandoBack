@@ -194,7 +194,9 @@ export class UsuariosController {
     responseDescription: 'Juego guardado correctamente',
   })
   @Post('/guardar-juego')
-  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
+  @Roles(RoleEnum.ADMIN, RoleEnum.USUARIO, RoleEnum.COLABORADOR)
   guardarJuego(@Body() guardarJuegoDto: GuardarJuegoDto) {
     return this.usuariosService.guardarJuego(guardarJuegoDto);
   }
@@ -205,7 +207,7 @@ export class UsuariosController {
     responseStatus: 200,
     responseDescription: 'Juego cargado correctamente',
   })
-  @Get('/cargar-juego')
+  @Post('/cargar-juego')
   cargarJuego(@Body() cargarJuegoDto: CargarJuegoDto) {
     return this.usuariosService.cargarJuego(cargarJuegoDto);
   }

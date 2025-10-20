@@ -61,8 +61,7 @@ model Usuario {
 
 model Guardado {
   id                 String   @id @default(uuid())
-  juego              Juego
-  nombre             String
+  nombre             Juego
   datosDeGuardado    Bytes
   fechaAlta          DateTime @default(now())
   fechaActualizacion DateTime @updatedAt

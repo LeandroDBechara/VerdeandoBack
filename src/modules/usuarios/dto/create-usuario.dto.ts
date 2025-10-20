@@ -176,12 +176,7 @@ export class GuardarJuegoDto {
     @ApiProperty({ description: 'Juego', example: 'CLICKER' })
     @IsNotEmpty({message: 'El juego es requerido'})
     @IsEnum(Juego, {message: 'El juego debe ser un juego válido'})
-    juego:Juego;
-
-    @ApiProperty({ description: 'Nombre', example: 'Clicker' })
-    @IsNotEmpty({message: 'El nombre es requerido'})
-    @IsString({message: 'El nombre debe ser una cadena de caracteres'})
-    nombre:string;
+    nombre:Juego;
 
     @ApiProperty({ description: 'Datos de guardado', example: 'datosDeGuardado' })
     @IsNotEmpty({message: 'Los datos de guardado son requeridos'})
@@ -198,7 +193,7 @@ export class CargarJuegoDto {
     @ApiProperty({ description: 'Juego', example: 'CLICKER' })
     @IsNotEmpty({message: 'El juego es requerido'})
     @IsEnum(Juego, {message: 'El juego debe ser un juego válido'})
-    juego:Juego;
+    nombre:Juego;
 
     @ApiProperty({ description: 'Usuario', example: '1' })
     @IsNotEmpty({message: 'El usuario es requerido'})
