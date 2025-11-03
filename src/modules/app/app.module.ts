@@ -13,6 +13,7 @@ import { AuthModule } from '../auth/auth.module';
 import { EventosModule } from '../eventos/eventos.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '../scheduler/scheduler.module';
+import { NewsletterModule } from '../newsletter/newsletter.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
     IntercambiosModule,
     EventosModule,
     SchedulerModule,
+    NewsletterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -43,7 +43,7 @@ export class CreateEventoDto {
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsOptional({ message: 'El código es requerido' })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @MaxLength(8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
@@ -135,7 +135,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
     return value;
   })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @Length(2, 8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })

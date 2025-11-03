@@ -31,6 +31,11 @@ enum Juego {
   IDLE
 }
 
+enum Tag {
+  Noticias
+  Manualidades
+}
+
 //Falta: comunidad(consultar con grupo);
 //caminos no felices
 
@@ -194,4 +199,16 @@ model Evento {
   isDeleted              Boolean  @default(false)
 
   intercambio Intercambio[]
+}
+
+model Newsletter {
+  id String @id @default(uuid())
+  titulo String
+  descripcion String
+  imagen String
+  url String
+  tag Tag
+  fechaCreacion DateTime @default(now())
+  views Int @default(0)
+  isDeleted Boolean @default(false)
 }
