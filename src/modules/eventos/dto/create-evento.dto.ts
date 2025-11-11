@@ -6,19 +6,17 @@ import { UpperCaseTransformer } from 'src/common/utils/UpperCaseTransformer';
 
 export class CreateEventoDto {
   @ApiProperty({ description: 'Título del evento', example: 'Evento de prueba' })
+  @Transform(UpperCaseTransformer)
   @IsNotEmpty({ message: 'El título es requerido' })
   @IsString({ message: 'El título debe ser una cadena de texto' })
-  @MaxLength(100, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @MinLength(2, { message: 'El título debe tener entre 2 y 100 caracteres' })
-  @Transform(UpperCaseTransformer)
+  @Length(2,100,{ message: 'El título debe tener entre 2 y 100 caracteres' })
   titulo: string;
 
   @ApiProperty({ description: 'Descripción del evento', example: 'Descripción del evento' })
+  @Transform(UpperCaseTransformer)
   @IsNotEmpty({ message: 'La descripción es requerida' })
   @IsString({ message: 'La descripción debe ser una cadena de texto' })
-  @MaxLength(500, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @MinLength(2, { message: 'La descripción debe tener entre 2 y 500 caracteres' })
-  @Transform(UpperCaseTransformer)
+  @Length(2,500,{ message: 'La descripción debe tener entre 2 y 500 caracteres' })
   descripcion: string;
 
   @ApiProperty({ description: 'Imagen del evento'})
@@ -43,7 +41,7 @@ export class CreateEventoDto {
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsOptional({ message: 'El código es requerido' })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @MaxLength(8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
@@ -135,7 +133,7 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
     return value;
   })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @Length(2, 8, { message: 'El código debe tener entre 2 y 8 caracteres' })
+  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
