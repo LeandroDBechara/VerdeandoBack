@@ -1,79 +1,99 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateNewsletterDto } from './dto/create-newsletter.dto';
-import { UpdateNewsletterDto } from './dto/update-newsletter.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import CustomError from 'src/common/utils/custom.error';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+
+interface NewsApiArticle {
+  source: {
+    id: string | null;
+    name: string;
+  };
+  author: string | null;
+  title: string;
+  description: string;
+  url: string;
+  urlToImage: string | null;
+  publishedAt: string;
+  content: string;
+}
+
+interface NewsApiResponse {
+  status: string;
+  totalResults: number;
+  articles: NewsApiArticle[];
+}
+
+export interface ArticuloDto {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  image: string;
+  url: string;
+  tag: string;
+  fechaCreacion: Date;
+  views: number;
+}
 
 @Injectable()
 export class NewsletterService {
-  constructor(private readonly prisma: PrismaService) {}
-  async create(createNewsletterDto: CreateNewsletterDto) {
-    try {
-      return this.prisma.newsletter.create({
-        data: createNewsletterDto,
-      });
-    } catch (error) {
-      throw new CustomError(error.message || 'Error al crear la newsletter', error.status || HttpStatus.BAD_REQUEST);
-    }
-  } 
+  private readonly logger = new Logger(NewsletterService.name);
+  private readonly newsApiKey: string;
+  private readonly newsApiUrl = 'https://newsapi.org/v2/everything';
 
-  async findAll() {
+  constructor(private configService: ConfigService) {
+    const apiKey = this.configService.get<string>('NEWS_API_KEY');
+    if (!apiKey) {
+      throw new Error('NEWS_API_KEY is not configured in environment variables');
+    }
+    this.newsApiKey = apiKey;
+  }
+
+  async getArticulos(): Promise<ArticuloDto[]> {
     try {
-      return this.prisma.newsletter.findMany({
-        where: { isDeleted: false },
-      });
+      this.logger.log('Fetching articles from NewsAPI...');
+      
+      const params = {
+        apiKey: this.newsApiKey,
+        sources: 'la-nacion,infobae,la-gaceta',
+        sortBy: 'relevancy',
+        q: '(medio AND ambiente) OR medioambiente OR reciclaje OR reciclar NOT Virginia NOT Palermo NOT countries NOT Lourdes NOT Rock',
+        pageSize: 5,
+      };
+
+      const response = await axios.get<NewsApiResponse>(this.newsApiUrl, { params });
+
+      if (response.data.status !== 'ok') {
+        throw new Error('NewsAPI returned error status');
+      }
+
+      // Transform NewsAPI articles to match frontend expectations
+      const articulos: ArticuloDto[] = response.data.articles.map((article, index) => ({
+        id: `${Date.now()}-${index}`,
+        titulo: article.title || 'Sin título',
+        descripcion: article.description || 'Sin descripción',
+        image: article.urlToImage || 'https://via.placeholder.com/400x300?text=No+Image',
+        url: article.url,
+        tag: this.extractTag(article.source.name),
+        fechaCreacion: new Date(article.publishedAt),
+        views: Math.floor(Math.random() * 1000) + 100, // Random views for now
+      }));
+
+      this.logger.log(`Successfully fetched ${articulos.length} articles`);
+      return articulos;
     } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener las newsletters', error.status || HttpStatus.BAD_REQUEST);
+      this.logger.error('Error fetching articles from NewsAPI', error.stack);
+      throw error;
     }
   }
 
-  async findOne(id: string) {
-    try {
-        const newsletter = await this.prisma.newsletter.findUnique({
-        where: { id, isDeleted: false },
-      });
-      if (!newsletter) {
-        throw new Error('La newsletter no existe');
-      }
-      return newsletter;
-    } catch (error) {
-      throw new CustomError(error.message || 'Error al obtener la newsletter', error.status || HttpStatus.BAD_REQUEST);
-    }
-  }
+  private extractTag(sourceName: string): string {
+    // Extract tag from source name
+    const tagMap: { [key: string]: string } = {
+      'La Nacion': 'Noticias',
+      'Infobae': 'Actualidad',
+      'La Gaceta': 'Regional',
+    };
 
-  async update(id: string, updateNewsletterDto: UpdateNewsletterDto) {
-    try {
-      const newsletter = await this.prisma.newsletter.findUnique({
-        where: { id, isDeleted: false },
-      });
-      if (!newsletter) {
-        throw new Error('La newsletter no existe');
-      }
-      await this.prisma.newsletter.update({
-        where: { id },
-        data: updateNewsletterDto,
-      });
-      return { message: 'Newsletter actualizada correctamente' };
-    } catch (error) {
-      throw new CustomError(error.message || 'Error al actualizar la newsletter', error.status || HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async remove(id: string) {
-    try {
-      const newsletter = await this.prisma.newsletter.findUnique({
-        where: { id, isDeleted: false },
-      });
-      if (!newsletter) {
-        throw new Error('La newsletter no existe');
-      }
-      await this.prisma.newsletter.update({
-        where: { id },
-        data: { isDeleted: true },
-      });
-      return { message: 'Newsletter eliminada correctamente' };
-    } catch (error) {
-      throw new CustomError(error.message || 'Error al eliminar la newsletter', error.status || HttpStatus.BAD_REQUEST);
-    }
+    return tagMap[sourceName] || 'Medio Ambiente';
   }
 }
+
