@@ -122,16 +122,6 @@ export class AuthService {
                 usuarioId: true,
               },
             },
-            comunidad: {
-              select: {
-                id: true,
-                nombre: true,
-                descripcion: true,
-                puntos: true,
-                historial: true,
-                isDeleted: true,
-              },
-            },
           },
         },
       );

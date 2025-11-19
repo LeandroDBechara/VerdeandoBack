@@ -31,16 +31,6 @@ export class UsuariosService {
           password: newUser.password,
           rol: newUser.rol,
         },
-        include: {
-          comunidad: {
-            select: {
-              id: true,
-              nombre: true,
-              descripcion: true,
-              puntos: true,
-            },
-          },
-        },
       });
       if (user && user.fotoPerfil) {
         user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;

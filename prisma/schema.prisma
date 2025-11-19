@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -89,7 +89,6 @@ model Colaborador {
   intercambio Intercambio[]
   puntoVerde  PuntoVerde[]
 }
-
 
 model Canje {
   id            String   @id @default(uuid())
@@ -191,13 +190,13 @@ model Evento {
 }
 
 model Newsletter {
-  id String @id @default(uuid())
-  titulo String
-  descripcion String
-  imagen String
-  url String
-  tag Tag
+  id            String   @id @default(uuid())
+  titulo        String
+  descripcion   String
+  imagen        String
+  url           String
+  tag           Tag
   fechaCreacion DateTime @default(now())
-  views Int @default(0)
-  isDeleted Boolean @default(false)
+  views         Int      @default(0)
+  isDeleted     Boolean  @default(false)
 }
