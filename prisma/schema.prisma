@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -55,9 +56,6 @@ model Usuario {
   fechaActualizacion DateTime @updatedAt
   isDeleted          Boolean  @default(false)
 
-  comunidadId String?    @unique
-  comunidad   Comunidad? @relation(fields: [comunidadId], references: [id])
-
   colaborador Colaborador?
   canje       Canje[]
   intercambio Intercambio[]
@@ -92,15 +90,6 @@ model Colaborador {
   puntoVerde  PuntoVerde[]
 }
 
-model Comunidad {
-  id          String    @id @default(uuid())
-  nombre      String
-  descripcion String
-  usuarios    Usuario[]
-  puntos      Int       @default(0)
-  historial   String
-  isDeleted   Boolean   @default(false)
-}
 
 model Canje {
   id            String   @id @default(uuid())
