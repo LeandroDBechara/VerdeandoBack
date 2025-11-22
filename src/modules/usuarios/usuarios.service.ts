@@ -281,7 +281,7 @@ export class UsuariosService {
       if (!guardado) {
         throw new Error('Guardado no encontrado');
       }
-      return { datosDeGuardado: guardado.datosDeGuardado, fechaActualizacion: guardado.fechaActualizacion };
+      return guardado.datosDeGuardado;
     } catch (error) {
       throw new CustomError(error.message || 'Error al cargar el juego', error.status || HttpStatus.BAD_REQUEST);
     }
