@@ -3,13 +3,16 @@ import { JwtService } from '@nestjs/jwt';
 import {CargarJuegoDto, CreateColaboradorDto, CreateUsuarioDto, GuardarJuegoDto, UpdateColaboradorDto, UpdateUsuarioDto} from './dto/create-usuario.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
-import { existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
 import CustomError from 'src/common/utils/custom.error';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class UsuariosService {
-  constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   async create(newUser: CreateUsuarioDto) {
     try {
@@ -32,9 +35,6 @@ export class UsuariosService {
           rol: newUser.rol,
         },
       });
-      if (user && user.fotoPerfil) {
-        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-      }
       return user;
     } catch (error) {
       throw new CustomError(error.message || 'Error al crear el usuario', error.status || HttpStatus.BAD_REQUEST);
@@ -139,11 +139,6 @@ export class UsuariosService {
       if (!users) {
         throw new Error('Usuarios no encontrados');
       }
-      users.map((user) => {
-        if (user && user.fotoPerfil) {
-          user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-        }
-      });
       return users;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener los usuarios', error.status || HttpStatus.BAD_REQUEST);
@@ -158,9 +153,6 @@ export class UsuariosService {
       });
       if (!user) {
         throw new Error('Usuario no encontrado');
-      }
-      if (user && user.fotoPerfil) {
-        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
       }
       // Verificar expiración del token y refrescar si corresponde
       let newAccessToken: string | undefined;
@@ -204,6 +196,19 @@ export class UsuariosService {
         throw new Error('El usuario no existe');
       }
 
+      // Eliminar la foto de perfil anterior si existe y es de Supabase
+      if (updateUsuarioDto.fotoPerfil && userExists && userExists.fotoPerfil) {
+        const filePath = this.supabaseService.extractFilePathFromUrl(userExists.fotoPerfil, 'usuarios');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('usuarios', filePath);
+          } catch (error) {
+            // Si falla la eliminación, continuar con la actualización
+            console.error('Error al eliminar foto anterior:', error);
+          }
+        }
+      }
+
       const user = await this.prisma.usuario.update({
         where: { id },
         data: {
@@ -211,28 +216,16 @@ export class UsuariosService {
         },
       });
 
-      //eliminar la foto de perfil anterior si existe
-      if (updateUsuarioDto.fotoPerfil && userExists && userExists.fotoPerfil) {
-        const fileName = userExists.fotoPerfil.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'usuarios', fileName);
-          if (existsSync(path)) {
-            unlinkSync(path);
-          }
-        }
-      }
-
-      if (user && user.fotoPerfil) {
-        user.fotoPerfil = `${process.env.URL_BACKEND}${user.fotoPerfil}`;
-      }
       return user;
     } catch (error) {
+      // Si hay error y se subió una nueva foto, intentar eliminarla
       if (updateUsuarioDto.fotoPerfil) {
-        const fileName = updateUsuarioDto.fotoPerfil.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'usuarios', fileName);
-          if (existsSync(path)) {
-            unlinkSync(path);
+        const filePath = this.supabaseService.extractFilePathFromUrl(updateUsuarioDto.fotoPerfil, 'usuarios');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('usuarios', filePath);
+          } catch (deleteError) {
+            console.error('Error al eliminar foto en rollback:', deleteError);
           }
         }
       }

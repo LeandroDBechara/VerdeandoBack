@@ -8,15 +8,18 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { existsSync, mkdirSync } from 'fs';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { memoryStorage } from 'multer';
+import { extname } from 'path';
+import { SupabaseService } from '../supabase/supabase.service';
 
 
 @ApiTags('Eventos')
 @Controller('eventos')
 export class EventosController {
-  constructor(private readonly eventosService: EventosService) {}
+  constructor(
+    private readonly eventosService: EventosService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @ApiCustomOperation({
     summary: 'Crear un evento',
@@ -55,29 +58,27 @@ export class EventosController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'eventos');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Post()
-  create(@Body() createEventoDto: CreateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
+  async create(@Body() createEventoDto: CreateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
     if (imagen) {
-      createEventoDto.imagen = `/img/eventos/${imagen.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(imagen.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'eventos',
+        fileName,
+        imagen,
+        imagen.mimetype,
+      );
+      
+      createEventoDto.imagen = publicUrl;
     }
     return this.eventosService.create(createEventoDto);
   }
@@ -138,29 +139,27 @@ export class EventosController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'eventos');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventoDto: UpdateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
+  async update(@Param('id') id: string, @Body() updateEventoDto: UpdateEventoDto, @UploadedFile() imagen: Express.Multer.File) {
     if (imagen) {
-      updateEventoDto.imagen = `/img/eventos/${imagen.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(imagen.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'eventos',
+        fileName,
+        imagen,
+        imagen.mimetype,
+      );
+      
+      updateEventoDto.imagen = publicUrl;
     }
     return this.eventosService.update(id, updateEventoDto);
   }

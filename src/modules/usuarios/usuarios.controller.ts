@@ -15,15 +15,18 @@ import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { memoryStorage } from 'multer';
+import { extname } from 'path';
+import { SupabaseService } from '../supabase/supabase.service';
 
 
 @ApiTags('Usuarios')
 @Controller('usuarios')
 export class UsuariosController {
-  constructor(private readonly usuariosService: UsuariosService) {}
+  constructor(
+    private readonly usuariosService: UsuariosService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @ApiCustomOperation({
     summary: 'Crear un usuario',
@@ -146,31 +149,27 @@ export class UsuariosController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'usuarios');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR)
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFile() fotoPerfil?: Express.Multer.File) {
+  async update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFile() fotoPerfil?: Express.Multer.File) {
     if (fotoPerfil) {
-      // Servido como estático en /img
-      updateUsuarioDto.fotoPerfil = `/img/usuarios/${fotoPerfil.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(fotoPerfil.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'usuarios',
+        fileName,
+        fotoPerfil,
+        fotoPerfil.mimetype,
+      );
+      
+      updateUsuarioDto.fotoPerfil = publicUrl;
     }
-    console.log('controlador: ', updateUsuarioDto);
     return this.usuariosService.update(id, updateUsuarioDto);
   }
 

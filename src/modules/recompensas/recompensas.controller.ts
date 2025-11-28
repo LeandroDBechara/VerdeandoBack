@@ -8,17 +8,19 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { memoryStorage } from 'multer';
 import { extname } from 'path';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @ApiTags('Recompensas')
 
 
 @Controller('recompensas')
 export class RecompensasController {
-  constructor(private readonly recompensasService: RecompensasService) {}
+  constructor(
+    private readonly recompensasService: RecompensasService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @ApiCustomOperation({
     summary: 'Crear una recompensa',
@@ -49,29 +51,27 @@ export class RecompensasController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'recompensas');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Post()
-  create(@Body() createRecompensaDto: CreateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
+  async create(@Body() createRecompensaDto: CreateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
     if (foto) {
-      createRecompensaDto.foto = `/img/recompensas/${foto.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(foto.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'recompensas',
+        fileName,
+        foto,
+        foto.mimetype,
+      );
+      
+      createRecompensaDto.foto = publicUrl;
     }
     return this.recompensasService.create(createRecompensaDto);
   }
@@ -151,29 +151,27 @@ export class RecompensasController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'recompensas');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRecompensaDto: UpdateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
+  async update(@Param('id') id: string, @Body() updateRecompensaDto: UpdateRecompensaDto, @UploadedFile() foto: Express.Multer.File) {
     if (foto) {
-      updateRecompensaDto.foto = `/img/recompensas/${foto.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(foto.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'recompensas',
+        fileName,
+        foto,
+        foto.mimetype,
+      );
+      
+      updateRecompensaDto.foto = publicUrl;
     }
     return this.recompensasService.update(id, updateRecompensaDto);
   }

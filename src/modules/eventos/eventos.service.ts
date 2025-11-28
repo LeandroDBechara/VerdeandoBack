@@ -2,12 +2,14 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { CreateEventoDto, UpdateEventoDto } from './dto/create-evento.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/common/utils/custom.error';
-import { existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class EventosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
   async create(createEventoDto: CreateEventoDto) {
     try {
       console.log( 'createEventoDto: ', createEventoDto);
@@ -63,11 +65,12 @@ export class EventosService {
       });
     } catch (error) {
       if (createEventoDto.imagen) {
-        const fileName = createEventoDto.imagen.split('/').pop();
-        if (fileName) {
-          const path = join(process.cwd(), 'img', 'eventos', fileName);
-          if (existsSync(path)) {
-            unlinkSync(path);
+        const filePath = this.supabaseService.extractFilePathFromUrl(createEventoDto.imagen, 'eventos');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('eventos', filePath);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen en rollback:', deleteError);
           }
         }
       }
@@ -102,9 +105,6 @@ export class EventosService {
       if (evento.fechaInicio > new Date()) {
         throw new Error('El evento no ha comenzado');
       }
-      if (evento && evento.imagen) {
-        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
-      }
       return evento;
     } catch (error) {
       throw new CustomError(
@@ -132,11 +132,6 @@ export class EventosService {
           puntosVerdesPermitidos: true,
         },
       });
-      eventos.map((evento) => {
-        if (evento.imagen) {
-          evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
-        }
-      });
       return eventos;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener los eventos', error.status || HttpStatus.BAD_REQUEST);
@@ -158,9 +153,6 @@ export class EventosService {
           puntosVerdesPermitidos: true,
         },
       });
-      if (evento && evento.imagen) {
-        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
-      }
       return evento;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el evento', error.status || HttpStatus.BAD_REQUEST);
@@ -193,6 +185,23 @@ export class EventosService {
         });
         updateEventoDto.puntosVerdesPermitidos = puntosVerdesPermitidos.map((puntoVerde) => puntoVerde.id);
       }
+      // Obtener el evento actual para eliminar la imagen anterior
+      const eventoActual = await this.prisma.evento.findUnique({
+        where: { id },
+      });
+
+      // Eliminar la imagen anterior si existe y es de Supabase
+      if (updateEventoDto.imagen && eventoActual && eventoActual.imagen) {
+        const filePath = this.supabaseService.extractFilePathFromUrl(eventoActual.imagen, 'eventos');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('eventos', filePath);
+          } catch (error) {
+            console.error('Error al eliminar imagen anterior:', error);
+          }
+        }
+      }
+
       const evento = await this.prisma.evento.update({
         where: { id },
         data: updateEventoDto,
@@ -207,11 +216,19 @@ export class EventosService {
           puntosVerdesPermitidos: true,
         },
       });
-      if (evento && evento.imagen) {
-        evento.imagen = `${process.env.URL_BACKEND}${evento.imagen}`;
-      }
       return evento;
     } catch (error) {
+      // Si hay error y se subió una nueva imagen, intentar eliminarla
+      if (updateEventoDto.imagen) {
+        const filePath = this.supabaseService.extractFilePathFromUrl(updateEventoDto.imagen, 'eventos');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('eventos', filePath);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen en rollback:', deleteError);
+          }
+        }
+      }
       throw new CustomError(error.message || 'Error al actualizar el evento', error.status || HttpStatus.BAD_REQUEST);
     }
   }

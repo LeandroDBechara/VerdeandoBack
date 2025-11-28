@@ -17,4 +17,8 @@ export const envValidationSchema = Joi.object({
   AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
   AWS_REGION: Joi.string().optional(),
   AWS_BUCKET: Joi.string().optional(),
+  
+  // Supabase (optional - only needed for file storage features)
+  SUPABASE_URL: Joi.string().optional(),
+  SUPABASE_KEY: Joi.string().optional(),
 });

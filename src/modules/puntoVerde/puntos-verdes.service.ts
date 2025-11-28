@@ -2,12 +2,14 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePuntosVerdeDto, UpdatePuntosVerdeDto } from './dto/create-puntos-verde.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import CustomError from 'src/common/utils/custom.error';
-import { existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class PuntosVerdesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   async create(createPuntosVerdeDto: CreatePuntosVerdeDto) {
     try {
@@ -31,22 +33,15 @@ export class PuntosVerdesService {
           imagen: imagen,
         },
       });
-      if (puntosVerde && puntosVerde.imagen) {
-        puntosVerde.imagen = `${process.env.URL_BACKEND}${puntosVerde.imagen}`;
-      }
       return puntosVerde;
     } catch (error) {
       if (createPuntosVerdeDto.imagen) {
-        const fileName = createPuntosVerdeDto.imagen.split('/').pop();
-        if (fileName) {
-          const path = join(
-            process.cwd(),
-            'img',
-            'puntos-verdes',
-            fileName,
-          );
-          if (existsSync(path)) {
-            unlinkSync(path);
+        const filePath = this.supabaseService.extractFilePathFromUrl(createPuntosVerdeDto.imagen, 'puntos-verdes');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('puntos-verdes', filePath);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen en rollback:', deleteError);
           }
         }
       }
@@ -60,11 +55,6 @@ export class PuntosVerdesService {
         where: {
           isDeleted: false,
         },
-      });
-      puntosVerdes.map((puntoVerde) => {
-        if (puntoVerde.imagen) {
-          puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-        }
       });
       return puntosVerdes;
     } catch (error) {
@@ -89,9 +79,6 @@ export class PuntosVerdesService {
       if (!puntoVerde) {
         throw new Error('El punto verde no existe');
       }
-      if (puntoVerde && puntoVerde.imagen) {
-        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-      }
       return puntoVerde;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener el punto verde', error.status || HttpStatus.BAD_REQUEST);
@@ -113,6 +100,31 @@ export class PuntosVerdesService {
         throw new Error('El colaborador no existe');
       }
 
+      // Obtener el punto verde actual para eliminar la imagen anterior
+      const puntoVerdeActual = await this.prisma.puntoVerde.findUnique({
+        where: {
+          id,
+          isDeleted: false,
+          colaboradorId: colaboradorId,
+        },
+      });
+
+      if (!puntoVerdeActual) {
+        throw new Error('El punto verde no existe o no pertenece al colaborador');
+      }
+
+      // Eliminar la imagen anterior si existe y es de Supabase
+      if (updatePuntosVerdeDto.imagen && puntoVerdeActual.imagen) {
+        const filePath = this.supabaseService.extractFilePathFromUrl(puntoVerdeActual.imagen, 'puntos-verdes');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('puntos-verdes', filePath);
+          } catch (error) {
+            console.error('Error al eliminar imagen anterior:', error);
+          }
+        }
+      }
+
       const { descripcion, imagen, ...puntosVerdeData } = updatePuntosVerdeDto;
       const puntoVerde = await this.prisma.puntoVerde.update({
         where: {
@@ -126,25 +138,16 @@ export class PuntosVerdesService {
           imagen: imagen,
         },
       });
-      if (!puntoVerde) {
-        throw new Error('El punto verde no existe o no pertenece al colaborador');
-      }
-      if (puntoVerde && puntoVerde.imagen) {
-        puntoVerde.imagen = `${process.env.URL_BACKEND}${puntoVerde.imagen}`;
-      }
       return puntoVerde;
     } catch (error) {
+      // Si hay error y se subió una nueva imagen, intentar eliminarla
       if (updatePuntosVerdeDto.imagen) {
-        const fileName = updatePuntosVerdeDto.imagen.split('/').pop();
-        if (fileName) {
-          const path = join(
-            process.cwd(),
-            'img',
-            'puntos-verdes',
-            fileName,
-          );
-          if (existsSync(path)) {
-            unlinkSync(path);
+        const filePath = this.supabaseService.extractFilePathFromUrl(updatePuntosVerdeDto.imagen, 'puntos-verdes');
+        if (filePath) {
+          try {
+            await this.supabaseService.deleteFile('puntos-verdes', filePath);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen en rollback:', deleteError);
           }
         }
       }

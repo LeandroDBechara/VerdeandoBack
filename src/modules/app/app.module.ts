@@ -14,6 +14,7 @@ import { EventosModule } from '../eventos/eventos.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '../scheduler/scheduler.module';
 import { NewsletterModule } from '../newsletter/newsletter.module';
+import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NewsletterModule } from '../newsletter/newsletter.module';
     }),
     ScheduleModule.forRoot(),
     PrismaModule,
+    SupabaseModule,
     AuthModule,
     UsuariosModule,
     ResiduosModule,

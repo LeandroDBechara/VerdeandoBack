@@ -9,15 +9,18 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { RoleEnum } from 'src/common/constants';
 import { Roles } from '../../common/decorators/roles.decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { SupabaseService } from '../supabase/supabase.service';
 
 
 @ApiTags('Puntos Verdes')
 @Controller('puntos-verdes')
 export class PuntosVerdesController {
-  constructor(private readonly puntosVerdesService: PuntosVerdesService) {}
+  constructor(
+    private readonly puntosVerdesService: PuntosVerdesService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @ApiCustomOperation({
     summary: 'Crear un nuevo punto verde',
@@ -69,26 +72,24 @@ export class PuntosVerdesController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'puntos-verdes');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @Post()
-  create(@Body() createPuntosVerdeDto: CreatePuntosVerdeDto, @UploadedFile() imagen: Express.Multer.File) {
+  async create(@Body() createPuntosVerdeDto: CreatePuntosVerdeDto, @UploadedFile() imagen: Express.Multer.File) {
     if (imagen) {
-      createPuntosVerdeDto.imagen = `/img/puntos-verdes/${imagen.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(imagen.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'puntos-verdes',
+        fileName,
+        imagen,
+        imagen.mimetype,
+      );
+      
+      createPuntosVerdeDto.imagen = publicUrl;
     }
     return this.puntosVerdesService.create(createPuntosVerdeDto);
   }
@@ -161,29 +162,28 @@ export class PuntosVerdesController {
         }
       },
       limits: { fileSize: 5 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'img', 'puntos-verdes');
-          if (!existsSync(uploadPath)) {
-            mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const fileExt = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${fileExt}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @Patch(':id/:colaboradorId')
-  update( @Param('id') id: string, @Param('colaboradorId') colaboradorId: string, @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto, @UploadedFile() imagen: Express.Multer.File,) {
+  async update( @Param('id') id: string, @Param('colaboradorId') colaboradorId: string, @Body() updatePuntosVerdeDto: UpdatePuntosVerdeDto, @UploadedFile() imagen: Express.Multer.File,) {
     if (imagen) {
-      updatePuntosVerdeDto.imagen = `/img/puntos-verdes/${imagen.filename}`;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = extname(imagen.originalname);
+      const fileName = `${uniqueSuffix}${fileExt}`;
+      const filePath = `puntos-verdes/${fileName}`;
+      
+      const publicUrl = await this.supabaseService.uploadFile(
+        'puntos-verdes',
+        filePath,
+        imagen,
+        imagen.mimetype,
+      );
+      
+      updatePuntosVerdeDto.imagen = publicUrl;
     }
     return this.puntosVerdesService.update(id, colaboradorId, updatePuntosVerdeDto);
   }
