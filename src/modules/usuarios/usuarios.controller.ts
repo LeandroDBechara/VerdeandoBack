@@ -154,7 +154,7 @@ export class UsuariosController {
   )
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
-  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR)
+  @Roles(RoleEnum.ADMIN, RoleEnum.COLABORADOR, RoleEnum.USUARIO)
   async update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto, @UploadedFile() fotoPerfil?: Express.Multer.File) {
     if (fotoPerfil) {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
