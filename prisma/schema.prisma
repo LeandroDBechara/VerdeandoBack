@@ -4,6 +4,10 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// pasar por parametro los parametros de busqueda de la newsletter
+//modifica bd para que el usuario tenga newsletter favoritas
+
+
 generator client {
   provider = "prisma-client-js"
 }
