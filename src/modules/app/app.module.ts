@@ -15,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from '../scheduler/scheduler.module';
 import { NewsletterModule } from '../newsletter/newsletter.module';
 import { SupabaseModule } from '../supabase/supabase.module';
+import { NewsModule } from '../APITube/news.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { SupabaseModule } from '../supabase/supabase.module';
     EventosModule,
     SchedulerModule,
     NewsletterModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
