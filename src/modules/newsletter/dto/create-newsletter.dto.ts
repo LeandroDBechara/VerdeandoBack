@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsString, IsUrl, Length } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, Length } from "class-validator";
 import { UpperCaseTransformer } from "src/common/utils/UpperCaseTransformer";
 import { Tag } from "@prisma/client";
 export class CreateNewsletterDto {
@@ -33,4 +33,10 @@ export class CreateNewsletterDto {
     @IsNotEmpty({ message: 'El tag es requerido' })
     @IsEnum(Tag, { message: 'El tag debe ser un tag válido' })
     tag: Tag;
+
+    @ApiProperty({ description: 'Fecha de creación de la newsletter', example: '2025-01-01' })
+    @IsOptional()
+    @IsNotEmpty({ message: 'La fecha de creación es requerida' })
+    @IsDate({ message: 'La fecha de creación debe ser una fecha válida' })
+    fechaCreacion?: Date;
 }

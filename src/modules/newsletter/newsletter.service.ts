@@ -47,16 +47,18 @@ export class NewsletterService {
     this.newsApiKey = apiKey;
   }
 
-  async getArticulos(): Promise<ArticuloDto[]> {
+  public async getArticulos(): Promise<ArticuloDto[]> {
     try {
       this.logger.log('Fetching articles from NewsAPI...');
       
       const params = {
         apiKey: this.newsApiKey,
-        sources: 'la-nacion,infobae,la-gaceta',
-        sortBy: 'relevancy',
-        q: '(medio AND ambiente) OR medioambiente OR reciclaje OR reciclar NOT Virginia NOT Palermo NOT countries NOT Lourdes NOT Rock',
+        q: '(medio AND ambiente) OR medioambiente OR reciclaje OR reciclar OR manualidades OR manualidad NOT(cambio AND climatico)',
         pageSize: 5,
+        domains: 'lagaceta.com.ar,lanacion.com.ar,infobae.com,pagina12.com.ar,clarin.com',
+        sortBy: 'publishedAt',
+        language: 'es',
+        from: `${new Date(Date.now() - 1000 * 60 * 60 * 24 * 60).toISOString()}`,//60 days ago
       };
 
       const response = await axios.get<NewsApiResponse>(this.newsApiUrl, { params });
@@ -74,7 +76,7 @@ export class NewsletterService {
         url: article.url,
         tag: this.extractTag(article.source.name),
         fechaCreacion: new Date(article.publishedAt),
-        views: Math.floor(Math.random() * 1000) + 100, // Random views for now
+        views: 0
       }));
 
       this.logger.log(`Successfully fetched ${articulos.length} articles`);
@@ -93,7 +95,7 @@ export class NewsletterService {
       'La Gaceta': 'Regional',
     };
 
-    return tagMap[sourceName] || 'Medio Ambiente';
+    return tagMap[sourceName] || 'General';
   }
 }
 

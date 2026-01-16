@@ -4,14 +4,15 @@ import axios from 'axios';
 import { APITubeNewsResponse, APITubeNewsArticle } from './dto/news.dto';
 import { NewsResponseDto } from './dto/news-response.dto';
 import { GetNewsParamsDto } from './dto/get-news-params.dto';
+import { NewsletterService } from '../newsletter/newsletter.service';
 //no muestra el enlace de la noticia ni las imagenes si no pagas
 @Injectable()
-export class NewsService {
-  private readonly logger = new Logger(NewsService.name);
+export class NewsServiceOld {
+  private readonly logger = new Logger(NewsServiceOld.name);
   private readonly apiKey: string;
   private readonly apiUrl = 'https://api.apitube.io/v1/news/everything';
 
-  constructor(private configService: ConfigService) {
+  constructor(private configService: ConfigService, private newsletterService: NewsletterService) {
     const apiKey = this.configService.get<string>('APITUBE_KEY');
     if (!apiKey) {
       throw new Error('APITUBE_KEY is not configured in environment variables');
@@ -72,7 +73,7 @@ export class NewsService {
     const relevancia = article.sentiment?.overall?.score
       ? parseFloat(article.sentiment.overall.score)
       : 0;
-
+      
     return {
       id: article.id,
       titulo: article.title || 'Sin título',
