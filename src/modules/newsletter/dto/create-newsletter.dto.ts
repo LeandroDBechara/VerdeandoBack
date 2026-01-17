@@ -3,11 +3,12 @@ import { Transform } from "class-transformer";
 import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, Length } from "class-validator";
 import { UpperCaseTransformer } from "src/common/utils/UpperCaseTransformer";
 import { Tag } from "@prisma/client";
+import { transformDateString } from "src/common/utils/date-transformer";
 export class CreateNewsletterDto {
     @ApiProperty({ description: 'Título de la newsletter', example: 'Newsletter de prueba' })
     @IsNotEmpty({ message: 'El título es requerido' })
     @IsString({ message: 'El título debe ser una cadena de texto' })
-    @Length(2, 100, { message: 'El título debe tener entre 2 y 100 caracteres' })
+    @Length(2, 300, { message: 'El título debe tener entre 2 y 300 caracteres' })
     @Transform(UpperCaseTransformer)
     titulo: string;
 
@@ -34,9 +35,9 @@ export class CreateNewsletterDto {
     @IsEnum(Tag, { message: 'El tag debe ser un tag válido' })
     tag: Tag;
 
-    @ApiProperty({ description: 'Fecha de creación de la newsletter', example: '2025-01-01' })
+    @ApiProperty({ description: 'Fecha de creación de la newsletter', example: '01-01-2025' })
     @IsOptional()
-    @IsNotEmpty({ message: 'La fecha de creación es requerida' })
-    @IsDate({ message: 'La fecha de creación debe ser una fecha válida' })
+    @Transform(({ value }) => transformDateString(value, 'La fecha de creación'))
+    @IsDate({message: 'La fecha de creación debe ser una fecha válida'})
     fechaCreacion?: Date;
 }

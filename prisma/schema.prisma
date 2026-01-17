@@ -39,6 +39,10 @@ enum Juego {
 enum Tag {
   Noticias
   Manualidades
+  Eventos
+  Ecologia
+  MedioAmbiente
+  Reciclaje
 }
 
 
