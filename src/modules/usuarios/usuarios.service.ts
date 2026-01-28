@@ -255,10 +255,21 @@ export class UsuariosService {
       if (!nombre || !datosDeGuardado || !usuarioId) {
         throw new Error('El juego, nombre, datosDeGuardado y usuarioId son requeridos');
       }
-      const guardado = await this.prisma.guardado.create({
-        data: { nombre, datosDeGuardado, usuarioId },
-      });
-      return { message: 'Juego guardado correctamente' };
+      const usuario = await this.prisma.usuario.findUnique({ where: { id: usuarioId } });
+      if (!usuario) {
+        throw new Error('Usuario no encontrado');
+      }
+      const guardado = await this.prisma.guardado.findFirst({ where: { nombre, usuarioId } });
+      if (guardado) {
+        await this.prisma.guardado.update({ where: { id: guardado.id }, data: { datosDeGuardado } });
+        return { message: 'Juego actualizado correctamente' };
+      }
+      else {
+      await this.prisma.guardado.create({
+          data: { nombre, datosDeGuardado, usuarioId },
+        });
+        return { message: 'Juego guardado correctamente' };
+      }
     } catch (error) {
       throw new CustomError(error.message || 'Error al guardar el juego', error.status || HttpStatus.BAD_REQUEST);
     }

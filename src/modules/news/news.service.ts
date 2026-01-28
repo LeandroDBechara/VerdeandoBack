@@ -19,7 +19,24 @@ export class NewsService {
 
   async getNews() { 
     try {
-      const news = await this.prisma.newsletter.findMany();
+      const news = await this.prisma.newsletter.findMany(
+        {
+          where: {
+            isDeleted: false,
+          },
+          include: {
+            usuariosFav: {
+              include: {
+                usuario: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      );
       return news;
     } catch (error) {
       throw new CustomError(error.message || 'Error al obtener las noticias', HttpStatus.BAD_REQUEST);
