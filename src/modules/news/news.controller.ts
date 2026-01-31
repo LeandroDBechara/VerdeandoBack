@@ -7,6 +7,8 @@ import { CreateNewsletterDto } from '../newsletter/dto/create-newsletter.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { RoleEnum } from 'src/common/constants';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiTags('News')
 @Controller('news')
@@ -26,7 +28,7 @@ export class NewsController {
     return await this.newsService.createNews(news);
   }
   @Post('add-to-favorite')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @ApiParam({ name: 'userId', type: String, description: 'User ID' })
@@ -38,7 +40,7 @@ export class NewsController {
     return await this.newsService.addNewToFavorite(userId, newsId, news);
   }
   @Post('remove-from-favorite')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth('access-token')
   @Roles(RoleEnum.USUARIO, RoleEnum.COLABORADOR, RoleEnum.ADMIN)
   @ApiBody({ schema: {
