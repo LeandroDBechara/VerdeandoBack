@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Req, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login.dto';
 import { RecoverPasswordDto, ResetPasswordDto } from './dto/auth.dto';
@@ -57,5 +58,30 @@ export class AuthController {
   async resetPassword(@Body() resetDto: ResetPasswordDto, @Req() req) {
     const id = req.user.userId;
     return await this.authService.resetPassword(resetDto, id);
+  }
+
+  @Get('google/callback')
+  googleCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string,
+    @Res() res: Response,
+  ) {
+    if (error) {
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html><body>
+          <p>Error de autenticación: ${error}</p>
+          <p>Puedes cerrar esta ventana.</p>
+        </body></html>
+      `);
+    }
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html><body>
+        <p>Autenticación exitosa. Puedes cerrar esta ventana.</p>
+        <script>setTimeout(() => window.close(), 1500);</script>
+      </body></html>
+    `);
   }
 }
