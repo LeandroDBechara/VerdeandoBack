@@ -45,7 +45,7 @@ export class EventosController {
           example: ['123456'],
         },
       },
-      required: ['titulo', 'descripcion', 'fechaInicio', 'fechaFin', 'codigo', 'multiplicador'],
+      required: ['titulo', 'descripcion', 'fechaInicio', 'fechaFin', 'multiplicador'],
     },
   })
   @UseInterceptors(

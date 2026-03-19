@@ -122,6 +122,23 @@ export class AuthService {
                 usuarioId: true,
               },
             },
+            favNews: {
+              select: {
+                id: true,
+                newsletter: {
+                  select: {
+                    id: true,
+                    titulo: true,
+                    descripcion: true,
+                    imagen: true,
+                    url: true,
+                    tag: true,
+                    fechaCreacion: true,
+                    views: true,
+                  },
+                },
+              },
+            },
           },
         },
       );
