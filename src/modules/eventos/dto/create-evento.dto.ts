@@ -38,10 +38,19 @@ export class CreateEventoDto {
   fechaFin: Date;
 
 
-  @ApiProperty({ description: 'Código del evento', example: '123456' })
-  @IsOptional({ message: 'El código es requerido' })
+  @ApiProperty({ description: 'Código del evento', example: '12345678' })
+  @IsOptional()
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
+  @Transform(({ value }) => {
+    // Si llega vacío (''), lo tratamos como "no enviado" para respetar que es opcional.
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed === '') return undefined;
+      return trimmed;
+    }
+    return value;
+  })
+  @Length(8, 8, { message: 'El código debe tener exactamente 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
@@ -129,11 +138,16 @@ export class UpdateEventoDto extends PartialType(CreateEventoDto) {
   @ApiProperty({ description: 'Código del evento', example: '123456' })
   @IsOptional({ message: 'El código es requerido' })
   @Transform(({ value }) => {
-    if (!value || value === '') { return undefined; }
+    if (!value) { return undefined; }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed === '') return undefined;
+      return trimmed;
+    }
     return value;
   })
   @IsString({ message: 'El código debe ser una cadena de texto' })
-  @MinLength(8, { message: 'El código debe tener 8 caracteres' })
+  @Length(8, 8, { message: 'El código debe tener exactamente 8 caracteres' })
   codigo?: string;
 
   @ApiProperty({ description: 'Multiplicador del evento', example: 1.2 })
