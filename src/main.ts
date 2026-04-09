@@ -33,7 +33,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const PORT = configService.get<number>('PORT')|| 4000;
-  const NODE_ENV = configService.get<string>('NODE_ENV');
+  const NODE_ENV = configService.get<string>('NODE_ENV') || 'development';
 
   app.useGlobalInterceptors(new LogguerInterceptor());
   
