@@ -73,10 +73,17 @@ export class NewsService {
          newsletter = await this.createNews(news);
       }
       
-      await this.prisma.usuario.update({
-        where: { id: userId },
-        data: { favNews: { connect: { id: newsletter.id } } },
+      const alreadyFav = await this.prisma.newsletterUsuario.findFirst({
+        where: { usuarioId: userId, newsletterId: newsletter.id },
       });
+      if (!alreadyFav) {
+        await this.prisma.newsletterUsuario.create({
+          data: {
+            usuarioId: userId,
+            newsletterId: newsletter.id,
+          },
+        });
+      }
       return { message: 'News added to favorites successfully' };
     } catch (error) {
       throw new CustomError(error.message || 'Error al agregar la noticia a favoritos', HttpStatus.BAD_REQUEST);
@@ -90,9 +97,8 @@ export class NewsService {
       if (!user) {
         throw new CustomError('Usuario no encontrado', HttpStatus.NOT_FOUND);
       }
-      await this.prisma.usuario.update({
-        where: { id: userId },
-        data: { favNews: { disconnect: { id: newsId } } },
+      await this.prisma.newsletterUsuario.deleteMany({
+        where: { usuarioId: userId, newsletterId: newsId },
       });
       return { message: 'News removed from favorites successfully' };
     }
