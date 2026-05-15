@@ -147,7 +147,7 @@ model Intercambio {
 model Residuo {
   id                 String               @id @default(uuid())
   material           String               @unique
-  puntosKg           Int
+  puntosKg           Float
   isDeleted          Boolean              @default(false)
   detalleIntercambio DetalleIntercambio[]
 }

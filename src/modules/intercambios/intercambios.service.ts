@@ -25,7 +25,7 @@ export class IntercambiosService {
         });
 
         if (residuo) {
-          pesoTotal += residuo.puntosKg;
+          pesoTotal += detalle.pesoGramos;
           puntosTotal += residuo.puntosKg * detalle.pesoGramos;
           detalles.push({
             residuoId: detalle.residuoId,
@@ -43,7 +43,8 @@ export class IntercambiosService {
           eventoId = evento.id;
         }
       }
-
+      puntosTotal = Math.round(puntosTotal);
+      pesoTotal = Math.round(pesoTotal);
       const intercambio = await this.prisma.intercambio.create({
         data: {
           usuarioId: createIntercambioDto.usuarioId,

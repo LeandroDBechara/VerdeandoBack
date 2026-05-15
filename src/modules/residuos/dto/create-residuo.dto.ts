@@ -19,7 +19,6 @@ export class CreateResiduoDto {
   @IsNotEmpty({ message: 'Los puntos por kg son requeridos' })
   @IsNumber({ allowInfinity: false }, { message: 'Los puntos por kg deben ser un número' })
   @IsPositive({ message: 'Los puntos por kg deben ser un número positivo' })
-  @IsInt({ message: 'Los puntos por kg deben ser un número entero' })
   puntosKg: number;
 }
 export class UpdateResiduoDto extends PartialType(CreateResiduoDto) {}
