@@ -231,7 +231,7 @@ export class IntercambiosService {
       }
 
       for (const intercambio of intercambios) {
-        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()) {
+        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()&& intercambio.estado === 'PENDIENTE') {
           await this.prisma.intercambio.update({
             where: { id: intercambio.id },
             data: { estado: 'EXPIRADO' },
@@ -276,7 +276,7 @@ export class IntercambiosService {
         throw new Error('No se encontraron intercambios');
       }
       for (const intercambio of intercambios) {
-        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()) {
+        if (intercambio.fechaLimite && intercambio.fechaLimite < new Date()&& intercambio.estado === 'PENDIENTE') {
           await this.prisma.intercambio.update({
             where: { id: intercambio.id },
             data: { estado: 'EXPIRADO' },
