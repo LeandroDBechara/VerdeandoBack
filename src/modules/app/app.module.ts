@@ -16,6 +16,7 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
 import { NewsletterModule } from '../newsletter/newsletter.module';
 import { SupabaseModule } from '../supabase/supabase.module';
 import { NewsModule } from '../news/news.module';
+import { EstadisticasModule } from '../estadisticas/estadisticas.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { NewsModule } from '../news/news.module';
     SchedulerModule,
     NewsletterModule,
     NewsModule,
+    EstadisticasModule
   ],
   controllers: [AppController],
   providers: [AppService],

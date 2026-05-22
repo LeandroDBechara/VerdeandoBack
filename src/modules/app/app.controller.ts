@@ -7,4 +7,9 @@ export class AppController {
   root() {
     return { message: 'Hello world!' };
   }
+  @Get('/dashboard')
+  @Render('dashboard')
+  confirmEmail() {
+    return { message: 'Hello world!' };
+  }
 }

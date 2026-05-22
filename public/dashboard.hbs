@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de Estadisticas - Verdeando</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      padding: 32px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .logo h1 {
+      color: #2c5530;
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    input,
+    button {
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      transition: all 0.3s ease;
+    }
+
+    input {
+      min-width: 280px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    button {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      border: none;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+    }
+
+    .status {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0 20px;
+      color: #666;
+      text-align: center;
+    }
+
+    .status.error {
+      color: #d32f2f;
+      border-color: #f2c7c2;
+      background: #ffebee;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 14px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+      padding: 16px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 6px;
+      border-bottom: 1px solid #edf2ed;
+      vertical-align: top;
+    }
+
+    th {
+      color: #666;
+      font-weight: 700;
+    }
+
+    .top-stat {
+      background: #e8f5e8;
+      border: 1px dashed #96c49a;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.92rem;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #edf4ef;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 24px 18px;
+      }
+
+      .logo h1 {
+        font-size: 1.9rem;
+      }
+
+      input {
+        min-width: 0;
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="logo">
+      <h1>🌱 Verdeando</h1>
+      <p>Dashboard de Estadisticas y metricas de <code>/estadisticas</code></p>
+    </section>
+
+    <section style="display:flex; justify-content:center; margin: 8px 0 14px;">
+      <button id="btnRefresh">Actualizar dashboard</button>
+    </section>
+
+    <div id="status" class="status">Cargando estadisticas...</div>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Usuarios con mas puntos</h2>
+        <div id="usuariosPuntos"></div>
+      </article>
+
+      <article class="card">
+        <h2>Usuarios que mas reciclaron (gramos)</h2>
+        <div id="usuariosReciclaron"></div>
+      </article>
+
+      <article class="card">
+        <h2>Usuarios con mas eventos participados</h2>
+        <div id="usuariosEventos"></div>
+      </article>
+
+      <article class="card">
+        <h2>Top recompensas mas canjeadas</h2>
+        <div id="recompensas"></div>
+      </article>
+
+      <article class="card">
+        <h2>Puntos verdes mas usados</h2>
+        <div id="puntosVerdes"></div>
+      </article>
+
+      <article class="card">
+        <h2>Eventos con mayor participacion</h2>
+        <div id="eventos"></div>
+      </article>
+
+      <article class="card">
+        <h2>Material mas reciclado (global)</h2>
+        <div id="materialGlobal" class="top-stat muted">Sin datos.</div>
+      </article>
+
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "/estadisticas";
+
+    const el = {
+      status: document.getElementById("status"),
+      usuariosPuntos: document.getElementById("usuariosPuntos"),
+      usuariosReciclaron: document.getElementById("usuariosReciclaron"),
+      usuariosEventos: document.getElementById("usuariosEventos"),
+      recompensas: document.getElementById("recompensas"),
+      puntosVerdes: document.getElementById("puntosVerdes"),
+      eventos: document.getElementById("eventos"),
+      materialGlobal: document.getElementById("materialGlobal")
+    };
+
+    async function request(path) {
+      const headers = { "Content-Type": "application/json" };
+
+      const res = await fetch(API_BASE + path, { headers });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(path + " -> HTTP " + res.status + " " + body.slice(0, 120));
+      }
+      return res.json();
+    }
+
+    function renderTable(target, headers, rows) {
+      if (!rows || rows.length === 0) {
+        target.innerHTML = '<p class="muted">Sin datos.</p>';
+        return;
+      }
+      const head = headers.map(function(h) { return "<th>" + h + "</th>"; }).join("");
+      const body = rows.map(function(row) {
+        const cols = row.map(function(col) { return "<td>" + col + "</td>"; }).join("");
+        return "<tr>" + cols + "</tr>";
+      }).join("");
+      target.innerHTML = "<table><thead><tr>" + head + "</tr></thead><tbody>" + body + "</tbody></table>";
+    }
+
+    function numberFmt(value) {
+      return new Intl.NumberFormat("es-AR").format(value || 0);
+    }
+
+    function renderBars(target, list, labelKey, valueKey, suffix) {
+      if (!list || list.length === 0) {
+        target.innerHTML = '<p class="muted">Sin datos.</p>';
+        return;
+      }
+      const max = Math.max.apply(null, list.map(function(i) { return Number(i[valueKey]) || 0; }));
+      target.innerHTML = list.map(function(item) {
+        const value = Number(item[valueKey]) || 0;
+        const width = max > 0 ? (value * 100) / max : 0;
+        return "<div style='margin-bottom:8px;'><div><strong>" + item[labelKey] + "</strong> - " + numberFmt(value) + " " + suffix + "</div><div class='bar-track'><div class='bar' style='width:" + width + "%'></div></div></div>";
+      }).join("");
+    }
+
+    function mapCountRows(list, labelKey, countPath) {
+      return (list || []).map(function(i) {
+        const count = i && i._count ? i._count[countPath] : 0;
+        return [i[labelKey], numberFmt(count)];
+      });
+    }
+
+    function parseMaterialObject(raw) {
+      if (!raw || typeof raw !== "object") return null;
+      const firstKey = Object.keys(raw)[0];
+      if (!firstKey) return null;
+      return { material: firstKey, gramos: Number(raw[firstKey]) || 0 };
+    }
+
+    async function loadDashboard() {
+      setStatus("Cargando estadisticas...");
+      const failures = [];
+
+      const endpoints = [
+        ["/usuarios-mas-puntos", function(data) {
+          renderBars(el.usuariosPuntos, data, "usuario", "puntos", "pts");
+        }],
+        ["/usuarios-mas-reciclaron", function(data) {
+          renderBars(el.usuariosReciclaron, data, "usuario", "pesoGramos", "g");
+        }],
+        ["/usuarios-mas-eventos-participaron", function(data) {
+          renderBars(el.usuariosEventos, data, "usuario", "eventosParticipados", "eventos");
+        }],
+        ["/recompensas-mas-canjeadas", function(data) {
+          renderTable(el.recompensas, ["Recompensa", "Canjes"], mapCountRows(data, "titulo", "canjes"));
+        }],
+        ["/puntos-verdes-mas-usados", function(data) {
+          renderTable(el.puntosVerdes, ["Punto verde", "Usos"], mapCountRows(data, "nombre", "intercambio"));
+        }],
+        ["/eventos-mayor-participacion", function(data) {
+          renderTable(el.eventos, ["Evento", "Participaciones"], mapCountRows(data, "titulo", "intercambio"));
+        }],
+        ["/material-mas-reciclado", function(data) {
+          const parsed = parseMaterialObject(data);
+          if (!parsed) {
+            el.materialGlobal.className = "top-stat muted";
+            el.materialGlobal.textContent = "Sin datos.";
+            return;
+          }
+          el.materialGlobal.className = "top-stat";
+          el.materialGlobal.innerHTML = "<strong>" + parsed.material + "</strong><br>" + numberFmt(parsed.gramos) + " gramos";
+        }]
+      ];
+
+      await Promise.all(endpoints.map(async function(item) {
+        const path = item[0];
+        const render = item[1];
+        try {
+          const data = await request(path);
+          render(data);
+        } catch (error) {
+          failures.push(error.message);
+        }
+      }));
+
+      if (failures.length === 0) {
+        setStatus("Dashboard actualizado correctamente.");
+      } else {
+        setStatus("Se cargaron datos parciales. Revisar errores: " + failures.join(" | "), true);
+      }
+    }
+
+    function setStatus(msg, isError) {
+      el.status.textContent = msg;
+      el.status.className = isError ? "status error" : "status";
+    }
+
+    document.getElementById("btnRefresh").addEventListener("click", loadDashboard);
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>
