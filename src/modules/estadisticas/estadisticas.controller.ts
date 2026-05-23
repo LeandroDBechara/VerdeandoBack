@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { EstadisticasService } from './estadisticas.service';
+import { Param } from '@nestjs/common';
 
 @ApiTags('Estadísticas')
 @Controller('estadisticas')
@@ -16,7 +17,8 @@ export class EstadisticasController {
         return this.estadisticasService.getUsuariosQueMasReciclaron();
     }
     @Get('tu-material-mas-reciclado/:usuarioId')
-    async getTuMaterialMasReciclado(usuarioId: string) {
+
+    async getTuMaterialMasReciclado(@Param('usuarioId') usuarioId: string) {
         return this.estadisticasService.getTuMaterialMasReciclado(usuarioId);
     }
     @Get('usuarios-mas-eventos-participaron')

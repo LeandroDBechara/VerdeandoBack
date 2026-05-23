@@ -292,16 +292,16 @@
 
     function mapCountRows(list, labelKey, countPath) {
       return (list || []).map(function(i) {
-        const count = i && i._count ? i._count[countPath] : 0;
+        const count = i && i.valor ? i.valor : 0;
         return [i[labelKey], numberFmt(count)];
       });
     }
 
     function parseMaterialObject(raw) {
       if (!raw || typeof raw !== "object") return null;
-      const firstKey = Object.keys(raw)[0];
-      if (!firstKey) return null;
-      return { material: firstKey, gramos: Number(raw[firstKey]) || 0 };
+      const nombre = raw.nombre || "Desconocido";
+      const valor = raw.valor || 0;
+      return { nombre, valor };
     }
 
     async function loadDashboard() {
@@ -310,22 +310,22 @@
 
       const endpoints = [
         ["/usuarios-mas-puntos", function(data) {
-          renderBars(el.usuariosPuntos, data, "usuario", "puntos", "pts");
+          renderBars(el.usuariosPuntos, data, "nombre", "valor", "pts");
         }],
         ["/usuarios-mas-reciclaron", function(data) {
-          renderBars(el.usuariosReciclaron, data, "usuario", "pesoGramos", "g");
+          renderBars(el.usuariosReciclaron, data, "nombre", "valor", "g");
         }],
         ["/usuarios-mas-eventos-participaron", function(data) {
-          renderBars(el.usuariosEventos, data, "usuario", "eventosParticipados", "eventos");
+          renderBars(el.usuariosEventos, data, "nombre", "valor", "eventos");
         }],
         ["/recompensas-mas-canjeadas", function(data) {
-          renderTable(el.recompensas, ["Recompensa", "Canjes"], mapCountRows(data, "titulo", "canjes"));
+          renderTable(el.recompensas, ["Recompensa", "Canjes"], mapCountRows(data, "nombre", "valor"));
         }],
         ["/puntos-verdes-mas-usados", function(data) {
-          renderTable(el.puntosVerdes, ["Punto verde", "Usos"], mapCountRows(data, "nombre", "intercambio"));
+          renderTable(el.puntosVerdes, ["Punto verde", "Usos"], mapCountRows(data, "nombre", "valor"));
         }],
         ["/eventos-mayor-participacion", function(data) {
-          renderTable(el.eventos, ["Evento", "Participaciones"], mapCountRows(data, "titulo", "intercambio"));
+          renderTable(el.eventos, ["Evento", "Participaciones"], mapCountRows(data, "nombre", "valor"));
         }],
         ["/material-mas-reciclado", function(data) {
           const parsed = parseMaterialObject(data);
@@ -335,7 +335,7 @@
             return;
           }
           el.materialGlobal.className = "top-stat";
-          el.materialGlobal.innerHTML = "<strong>" + parsed.material + "</strong><br>" + numberFmt(parsed.gramos) + " gramos";
+          el.materialGlobal.innerHTML = "<strong>" + parsed.nombre + "</strong><br>" + numberFmt(parsed.valor) + " gramos";
         }]
       ];
 

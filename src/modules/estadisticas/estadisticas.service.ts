@@ -17,8 +17,8 @@ export class EstadisticasService {
       take: 10,
     });
     const usuariosConPuntos = usuarios.map((usuario) => ({
-      usuario: `${usuario.nombre} ${usuario.apellido}`,
-      puntos: usuario.puntos,
+      nombre: `${usuario.nombre} ${usuario.apellido}`,
+      valor: usuario.puntos,
     }));
     return usuariosConPuntos;
   }
@@ -42,16 +42,18 @@ export class EstadisticasService {
       },
     });
 
-    return usuarios
+    const usuariosConPeso = usuarios
       .map((u) => ({
-        usuario: `${u.nombre} ${u.apellido}`,
-        pesoGramos: u.intercambio.reduce(
+        nombre: `${u.nombre} ${u.apellido}`,
+        valor: u.intercambio.reduce(
           (total, i) => total + i.detalleIntercambio.reduce((sub, d) => sub + d.pesoGramos, 0),
           0,
         ),
       }))
-      .sort((a, b) => b.pesoGramos - a.pesoGramos)
+      .sort((a, b) => b.valor - a.valor)
       .slice(0, 10);
+
+    return usuariosConPeso;
   }
 
   async getTuMaterialMasReciclado(usuarioId: string) {
@@ -93,7 +95,12 @@ export class EstadisticasService {
         }
       });
     });
-    return materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
+    const aux=materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
+    const materialMasReciclado = Object.keys(aux)[0];
+    const pesoGramos = aux[materialMasReciclado];
+    const material = { nombre: materialMasReciclado, valor: pesoGramos };
+    return material;
+
   }
   async getUsuariosQueMasEventosParticiparon() {
     const usuarios = await this.prisma.usuario.findMany({
@@ -112,7 +119,7 @@ export class EstadisticasService {
         },
       },
     });
-    const contadorEventos: { usuario: string; eventosParticipados: number }[] = [];
+    const contadorEventos: { nombre: string; valor: number }[] = [];
     usuarios.forEach((usuario) => {
       const usuarioNombre = `${usuario.nombre} ${usuario.apellido}`;
       usuario.intercambio.forEach((intercambio) => {
@@ -126,9 +133,9 @@ export class EstadisticasService {
           eventoTitulo.push(intercambio.evento.titulo);
         }
       });
-      contadorEventos.push({ usuario: usuarioNombre, eventosParticipados: usuario.intercambio.length });
+      contadorEventos.push({ nombre: usuarioNombre, valor: usuario.intercambio.length });
     });
-    return contadorEventos.sort((a, b) => b.eventosParticipados - a.eventosParticipados).slice(0, 10);
+    return contadorEventos.sort((a, b) => b.valor - a.valor).slice(0, 10);
   }
   //admin
   async getMaterialMasReciclado() {
@@ -159,7 +166,11 @@ export class EstadisticasService {
         }
       });
     });
-    return materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
+    const aux=materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
+    const materialMasReciclado = Object.keys(aux)[0];
+    const pesoGramos = aux[materialMasReciclado];
+    const material = { nombre: materialMasReciclado, valor: pesoGramos };
+    return material;
   }
 
   async getRecompensasMasCanjeadas() {
@@ -174,7 +185,11 @@ export class EstadisticasService {
       orderBy: { canjes: { _count: 'desc' } },
       take: 10,
     });
-    return recompensas;
+    const recompensasConValor = recompensas.map((r) => ({
+      nombre: r.titulo,
+      valor: r._count.canjes,
+    }));
+    return recompensasConValor;
   }
 
   async getPuntosVerdesMasUsados() {
@@ -188,7 +203,11 @@ export class EstadisticasService {
       orderBy: { intercambio: { _count: 'desc' } },
       take: 10,
     });
-    return puntosVerdes;
+    const puntosVerdesConValor = puntosVerdes.map((p) => ({
+      nombre: p.nombre,
+      valor: p._count.intercambio,
+    }));
+    return puntosVerdesConValor;
   }
 
   async getEventosMayorPartisipacion() {
@@ -204,7 +223,11 @@ export class EstadisticasService {
       orderBy: { intercambio: { _count: 'desc' } },
       take: 10,
     });
-    return eventos;
+    const eventosConValor = eventos.map((e) => ({
+      nombre: e.titulo,
+      valor: e._count.intercambio,
+    }));
+    return eventosConValor;
   }
   //async getAppConMasRegistros() {}
   //async getAppConUsuarios() {}
