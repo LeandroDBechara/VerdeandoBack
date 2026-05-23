@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import CustomError from 'src/common/utils/custom.error';
 import { SupabaseService } from '../supabase/supabase.service';
+import { createTokens } from 'src/common/utils/encryption';
 
 @Injectable()
 export class UsuariosService {
@@ -155,7 +156,7 @@ export class UsuariosService {
         throw new Error('Usuario no encontrado');
       }
       // Verificar expiración del token y refrescar si corresponde
-      let newAccessToken: string | undefined;
+      let newAccessToken: { accessToken: string } | undefined;
       try {
         const token = authorizationHeader?.startsWith('Bearer ')
           ? authorizationHeader.split(' ')[1]
@@ -167,12 +168,8 @@ export class UsuariosService {
           // También podemos refrescar si está por expirar en menos de 5 minutos
           const isNearExpiry = expMs ? expMs - Date.now() < 5 * 60 * 1000 : false;
           if (isExpired || isNearExpiry) {
-            const payload = { id: user.id, email: user.email, role: user.rol };
-            const { accessToken } = await (await import('src/common/utils/encryption')).createTokens(
-              payload,
-              this.jwtService,
-            );
-            newAccessToken = accessToken;
+          const payload = { id: user.id, email: user.email, role: user.rol };
+              newAccessToken = await createTokens(payload, this.jwtService);
           }
         }
       } catch (err) {
