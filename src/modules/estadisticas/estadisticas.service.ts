@@ -89,17 +89,20 @@ export class EstadisticasService {
         const pesoGramos = detalle.pesoGramos;
         const materialExistente = materiales.find((m) => Object.keys(m)[0] === material);
         if (materialExistente) {
-          materialExistente[material] += pesoGramos;
+          materiales[material] += pesoGramos;
         } else {
           materiales.push({ [material]: pesoGramos });
         }
       });
     });
-    const aux=materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
-    const materialMasReciclado = Object.keys(aux)[0];
-    const pesoGramos = aux[materialMasReciclado];
-    const material = { nombre: materialMasReciclado, valor: pesoGramos };
-    return material;
+
+    const materialpuntos:{nombre:string, valor:number}[] =[] 
+    materiales.forEach((m) => {
+      const material = Object.keys(m)[0];
+      const valor = m[material];
+      materialpuntos.push({ nombre: material, valor });
+    });
+    return materialpuntos.sort((a, b) => b.valor - a.valor);
 
   }
   async getUsuariosQueMasEventosParticiparon() {
@@ -160,17 +163,21 @@ export class EstadisticasService {
         const pesoGramos = detalle.pesoGramos;
         const materialExistente = materiales.find((m) => Object.keys(m)[0] === material);
         if (materialExistente) {
-          materialExistente[material] += pesoGramos;
+          materiales[material] += pesoGramos;
         } else {
           materiales.push({ [material]: pesoGramos });
         }
       });
     });
-    const aux=materiales.sort((a, b) => b.pesoGramos - a.pesoGramos)[0];
-    const materialMasReciclado = Object.keys(aux)[0];
-    const pesoGramos = aux[materialMasReciclado];
-    const material = { nombre: materialMasReciclado, valor: pesoGramos };
-    return material;
+
+    const materialpuntos:{nombre:string, valor:number}[] =[] 
+    materiales.forEach((m) => {
+      const material = Object.keys(m)[0];
+      const valor = m[material];
+      materialpuntos.push({ nombre: material, valor });
+    });
+    return materialpuntos.sort((a, b) => b.valor - a.valor);
+
   }
 
   async getRecompensasMasCanjeadas() {

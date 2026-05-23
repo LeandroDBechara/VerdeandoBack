@@ -328,14 +328,7 @@
           renderTable(el.eventos, ["Evento", "Participaciones"], mapCountRows(data, "nombre", "valor"));
         }],
         ["/material-mas-reciclado", function(data) {
-          const parsed = parseMaterialObject(data);
-          if (!parsed) {
-            el.materialGlobal.className = "top-stat muted";
-            el.materialGlobal.textContent = "Sin datos.";
-            return;
-          }
-          el.materialGlobal.className = "top-stat";
-          el.materialGlobal.innerHTML = "<strong>" + parsed.nombre + "</strong><br>" + numberFmt(parsed.valor) + " gramos";
+          renderTable(el.materialGlobal, ["Material", "Gramos reciclados"], mapCountRows(data, "nombre", "valor"));
         }]
       ];
 
