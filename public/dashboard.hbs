@@ -13,44 +13,71 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 45%, #40916c 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px 16px 32px;
+      color: #1f2933;
     }
 
     .container {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      padding: 32px;
+      background: #f7faf8;
+      border-radius: 24px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
+      overflow: hidden;
     }
 
-    .logo {
-      margin-bottom: 24px;
+    .dashboard-header {
+      background: linear-gradient(135deg, #081c15 0%, #1b4332 100%);
+      padding: 28px 32px 24px;
       text-align: center;
+      border-bottom: 3px solid #74c69d;
     }
 
-    .logo h1 {
-      color: #2c5530;
-      font-size: 2.2rem;
-      margin-bottom: 8px;
+    .brand-logo {
+      display: block;
+      width: min(280px, 72vw);
+      height: auto;
+      margin: 0 auto 14px;
+      object-fit: contain;
     }
 
-    .logo p {
-      color: #666;
-      font-size: 1rem;
+    .dashboard-subtitle {
+      color: #b7e4c7;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .dashboard-subtitle code {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(183, 228, 199, 0.35);
+      border-radius: 6px;
+      color: #d8f3dc;
+      font-size: 0.88rem;
+      padding: 2px 8px;
+    }
+
+    .dashboard-body {
+      padding: 24px 32px 32px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
     }
 
     input,
     button {
-      border: 2px solid #e1e5e9;
+      border: 2px solid #d8e2dc;
       border-radius: 10px;
       font-size: 0.95rem;
-      padding: 12px 14px;
-      transition: all 0.3s ease;
+      padding: 12px 18px;
+      transition: all 0.25s ease;
     }
 
     input {
@@ -59,51 +86,53 @@
     }
 
     input:focus {
-      border-color: #4CAF50;
-      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+      border-color: #40916c;
+      box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.15);
     }
 
     button {
-      background: linear-gradient(45deg, #4CAF50, #45a049);
+      background: linear-gradient(45deg, #40916c, #2d6a4f);
       color: white;
       cursor: pointer;
       font-weight: 600;
       border: none;
+      min-width: 220px;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 10px 20px rgba(45, 106, 79, 0.35);
     }
 
     .status {
-      background: #f8f9fa;
-      border: 1px solid #e1e5e9;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 12px 0 20px;
-      color: #666;
+      background: #ffffff;
+      border: 1px solid #d8e2dc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      color: #52606d;
       text-align: center;
+      font-size: 0.94rem;
     }
 
     .status.error {
-      color: #d32f2f;
-      border-color: #f2c7c2;
-      background: #ffebee;
+      color: #b42318;
+      border-color: #fecdca;
+      background: #fef3f2;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
+      gap: 18px;
     }
 
     .card {
-      background: white;
-      border: 1px solid #e1e5e9;
-      border-radius: 14px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
-      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #e3ebe6;
+      border-radius: 16px;
+      box-shadow: 0 8px 18px rgba(27, 67, 50, 0.06);
+      padding: 18px;
       animation: fadeIn 0.5s ease-in;
     }
 
@@ -113,9 +142,11 @@
     }
 
     .card h2 {
-      margin: 0 0 12px;
+      margin: 0 0 14px;
       font-size: 1rem;
-      color: #333;
+      color: #1b4332;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #d8f3dc;
     }
 
     table {
@@ -132,13 +163,13 @@
     }
 
     th {
-      color: #666;
+      color: #52606d;
       font-weight: 700;
     }
 
     .top-stat {
-      background: #e8f5e8;
-      border: 1px dashed #96c49a;
+      background: #edf7f0;
+      border: 1px dashed #95d5b2;
       border-radius: 10px;
       padding: 10px;
       font-size: 0.92rem;
@@ -156,20 +187,24 @@
     .bar {
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #4CAF50, #45a049);
+      background: linear-gradient(90deg, #52b788, #2d6a4f);
     }
 
     .muted {
-      color: #666;
+      color: #667085;
     }
 
     @media (max-width: 640px) {
-      .container {
-        padding: 24px 18px;
+      body {
+        padding: 12px 10px 20px;
       }
 
-      .logo h1 {
-        font-size: 1.9rem;
+      .dashboard-header {
+        padding: 22px 18px 18px;
+      }
+
+      .dashboard-body {
+        padding: 18px 16px 22px;
       }
 
       input {
@@ -185,54 +220,57 @@
 </head>
 <body>
   <main class="container">
-    <section class="logo">
-      <h1>🌱 Verdeando</h1>
-      <p>Dashboard de Estadisticas y metricas de <code>/estadisticas</code></p>
-    </section>
+    <header class="dashboard-header">
+      <img src="/logoVerdeando.png" alt="Verdeando" class="brand-logo" />
+      <p class="dashboard-subtitle">
+        Dashboard de Estadisticas y metricas de <code>/estadisticas</code>
+      </p>
+    </header>
 
-    <section style="display:flex; justify-content:center; margin: 8px 0 14px;">
-      <button id="btnRefresh">Actualizar dashboard</button>
-    </section>
+    <div class="dashboard-body">
+      <section class="toolbar">
+        <button id="btnRefresh">Actualizar dashboard</button>
+      </section>
 
-    <div id="status" class="status">Cargando estadisticas...</div>
+      <div id="status" class="status">Cargando estadisticas...</div>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Usuarios con mas puntos</h2>
-        <div id="usuariosPuntos"></div>
-      </article>
+      <section class="grid">
+        <article class="card">
+          <h2>Usuarios con mas puntos</h2>
+          <div id="usuariosPuntos"></div>
+        </article>
 
-      <article class="card">
-        <h2>Usuarios que mas reciclaron (gramos)</h2>
-        <div id="usuariosReciclaron"></div>
-      </article>
+        <article class="card">
+          <h2>Usuarios que mas reciclaron (gramos)</h2>
+          <div id="usuariosReciclaron"></div>
+        </article>
 
-      <article class="card">
-        <h2>Usuarios con mas eventos participados</h2>
-        <div id="usuariosEventos"></div>
-      </article>
+        <article class="card">
+          <h2>Usuarios con mas eventos participados</h2>
+          <div id="usuariosEventos"></div>
+        </article>
 
-      <article class="card">
-        <h2>Top recompensas mas canjeadas</h2>
-        <div id="recompensas"></div>
-      </article>
+        <article class="card">
+          <h2>Top recompensas mas canjeadas</h2>
+          <div id="recompensas"></div>
+        </article>
 
-      <article class="card">
-        <h2>Puntos verdes mas usados</h2>
-        <div id="puntosVerdes"></div>
-      </article>
+        <article class="card">
+          <h2>Puntos verdes mas usados</h2>
+          <div id="puntosVerdes"></div>
+        </article>
 
-      <article class="card">
-        <h2>Eventos con mayor participacion</h2>
-        <div id="eventos"></div>
-      </article>
+        <article class="card">
+          <h2>Eventos con mayor participacion</h2>
+          <div id="eventos"></div>
+        </article>
 
-      <article class="card">
-        <h2>Material mas reciclado (global)</h2>
-        <div id="materialGlobal" class="top-stat muted">Sin datos.</div>
-      </article>
-
-    </section>
+        <article class="card">
+          <h2>Material mas reciclado (global)</h2>
+          <div id="materialGlobal" class="top-stat muted">Sin datos.</div>
+        </article>
+      </section>
+    </div>
   </main>
 
   <script>
