@@ -52,11 +52,13 @@ export class MessagingService {
 <body style="font-family: sans-serif; background-color: #f4f4f4; padding: 20px;">
     <div style="background-color: #ffffff; padding: 30px; border-radius: 5px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
         <h2 style="color: #333333;">Recuperación de contraseña</h2>
-        <p>Hola,</p>
-        <p>Recuperación de contraseña</p>
-        <a href="${url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px;">Recuperación de contraseña</a>
-        <p>Recuperación de contraseña</p>
-        <p>Gracias por registrarte</p>
+        <p>Hola, ${to}</p>
+        <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+        <p>Para crear una nueva, hace clic en el siguiente boton:</p>
+        <a href="${url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a>
+        <p>Si no solicitaste restablecer tu contraseña, puedes ignorar este correo.</p>
+        <p>Gracias,</p>
+        <p>Equipo de Verdeando</p>
     </div>
 </body>
 </html>`;
